@@ -430,6 +430,8 @@ function buildTable(area,n){
     ITEMS.forEach((_,k)=>{
       cnsHTML+=`<td><div class="cns"><button class="cb2" onclick="setCNS(this,'ac')" data-i="${i}" data-k="${k}">C</button><button class="cb2" onclick="setCNS(this,'anc')" data-i="${i}" data-k="${k}">NC</button><button class="cb2" onclick="setCNS(this,'ana')" data-i="${i}" data-k="${k}">NA</button></div></td>`;
     });
+    const capVal=(pre.capacidad||'').replace(' Lbs','').replace(' lb','').trim();
+    const capsOpts=CAPS.map(c=>'<option value="'+c+'"'+(c===capVal?' selected':'')+'>'+c+' Lbs</option>').join('');
     const tr=document.createElement('tr');
     tr.id=`row-${i}`;
     tr.innerHTML=`
@@ -446,7 +448,7 @@ function buildTable(area,n){
         </div>
       </td>
       <td><select style="min-width:80px"><option value="">--</option>${tipoOpts}</select></td>
-      <td><select style="min-width:80px">${CAPS.map(c=>`<option value="${c}" ${c===(pre.capacidad||'').replace(' Lbs','').replace(' lb','').trim()?'selected':''}>${c} Lbs</option>`).join('')}</select></td>
+      <td><select style="min-width:80px">${capsOpts}</select></td>
       <td><input type="text" value="${pre.marca||''}" style="min-width:90px"></td>
       ${cnsHTML}
       <td><input type="date" style="min-width:130px"></td>
