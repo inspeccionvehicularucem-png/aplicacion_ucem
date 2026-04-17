@@ -171,6 +171,7 @@ table.ext td input,table.ext td select{padding:5px 7px;font-size:12px;border-rad
       <div class="pdf-body" id="pdfBody"></div>
     </div>
     <button class="btn btn-pdf" onclick="window.print()">⬇ Descargar / Imprimir PDF</button>
+    <button class="btn btn-p" id="btnGuardar" style="background:#1a7a4a">💾 Guardar registro</button>
     <button class="btn btn-s" id="btnNueva">+ Nueva inspección</button>
     <button onclick="goRegistros()" style="width:100%;padding:9px;border:1.5px solid #b3d4f5;border-radius:6px;background:#f0f7ff;color:var(--azul);font-size:12px;font-weight:600;cursor:pointer;margin-top:4px">📋 Ver registros</button>
   </div>
@@ -228,6 +229,7 @@ window.onload = function() {
   document.getElementById('btnP1b').addEventListener('click', goP1);
   document.getElementById('btnP2b').addEventListener('click', goP2);
   document.getElementById('btnCalc').addEventListener('click', calcRes);
+  document.getElementById('btnGuardar').addEventListener('click', guardarRegistro);
   document.getElementById('btnNueva').addEventListener('click', resetApp);
   document.getElementById('btnVolverReg').addEventListener('click', goP1);
 };
@@ -485,29 +487,73 @@ function renderRes(ncs, rowData) {
 
   document.getElementById('pdfWrap').style.display = 'block';
 
-  // Guardar en Sheets
-  guardarEnSheets(fecha, nInsp, area, rowData);
+  // Guardar datos en variable global para cuando presione "Guardar registro"
+  window._lastResult = { fecha: fecha, nInsp: nInsp, area: area, rowData: rowData, operativoGlobal: operativoGlobal };
+  document.getElementById('btnGuardar').disabled = false;
+  document.getElementById('btnGuardar').textContent = '💾 Guardar registro';
+  document.getElementById('btnGuardar').style.background = '#1a7a4a';
+}
 
-  // Guardar local
-  var reg = {
-    id: Date.now(), fecha: fecha, nInsp: nInsp||'-', area: area,
-    responsable: tActual ? tActual.n : '-', cargo: tActual ? tActual.cargo : '-',
-    operativoGlobal: operativoGlobal, rowData: rowData,
-    trabajadorCodigo: tActual ? tActual.c : ''
-  };
+function guardarRegistro() {
+  var d = window._lastResult;
+  if (!d) { alert('Primero genera un resultado.'); return; }
+
+  var btn = document.getElementById('btnGuardar');
+  btn.disabled = true;
+  btn.textContent = '⏳ Guardando...';
+
+  var ahora = new Date();
+  var fechaGuardado = ahora.toLocaleDateString('es-EC') + ' ' + ahora.toLocaleTimeString('es-EC', {hour:'2-digit',minute:'2-digit'});
+
   var REGISTROS = JSON.parse(localStorage.getItem('ucem_registros') || '[]');
+
   if (_editIndex !== null && _editIndex !== undefined) {
+    // Edición — actualizar registro existente
+    var fechaCreacion = REGISTROS[_editIndex].fechaCreacion || REGISTROS[_editIndex].fecha;
+    var reg = {
+      id: REGISTROS[_editIndex].id,
+      fecha: d.fecha,
+      fechaCreacion: fechaCreacion,
+      fechaActualizacion: fechaGuardado,
+      nInsp: d.nInsp||'-', area: d.area,
+      responsable: tActual ? tActual.n : '-',
+      cargo: tActual ? tActual.cargo : '-',
+      operativoGlobal: d.operativoGlobal,
+      rowData: d.rowData,
+      trabajadorCodigo: tActual ? tActual.c : ''
+    };
     REGISTROS[_editIndex] = reg;
     _editIndex = null;
   } else {
+    // Nuevo registro
+    var reg = {
+      id: Date.now(),
+      fecha: d.fecha,
+      fechaCreacion: fechaGuardado,
+      fechaActualizacion: null,
+      nInsp: d.nInsp||'-', area: d.area,
+      responsable: tActual ? tActual.n : '-',
+      cargo: tActual ? tActual.cargo : '-',
+      operativoGlobal: d.operativoGlobal,
+      rowData: d.rowData,
+      trabajadorCodigo: tActual ? tActual.c : ''
+    };
     REGISTROS.unshift(reg);
   }
   localStorage.setItem('ucem_registros', JSON.stringify(REGISTROS));
+
+  // Guardar en Sheets
+  guardarEnSheets(d.fecha, d.nInsp, d.area, d.rowData, fechaGuardado);
+
+  btn.textContent = '✓ Guardado — ' + fechaGuardado;
+  btn.style.background = '#0f6e56';
+  window._lastResult = null;
 }
 
-function guardarEnSheets(fecha, nInsp, area, rowData) {
+function guardarEnSheets(fecha, nInsp, area, rowData, fechaGuardado) {
   var payload = {
     fecha: fecha, nInsp: nInsp, area: area,
+    fechaGuardado: fechaGuardado || fecha,
     planta: 'Planta Chimborazo',
     responsable: tActual ? tActual.n : '-',
     cargo: tActual ? tActual.cargo : '-',
@@ -540,6 +586,7 @@ function renderRegistros() {
         '<div>' +
           '<div style="font-weight:600;font-size:13px">' + r.area + '</div>' +
           '<div style="font-size:11px;color:var(--gm);margin-top:2px">' + r.fecha + ' · Nº' + r.nInsp + ' · ' + r.responsable + '</div>' +
+          '<div style="font-size:10px;color:var(--gm)">Guardado: ' + (r.fechaCreacion||r.fecha) + (r.fechaActualizacion ? ' · <span style="color:#1a5276">Actualizado: ' + r.fechaActualizacion + '</span>' : '') + '</div>' +
           '<div style="font-size:11px;color:var(--gm)">' + r.rowData.length + ' extintor(es)</div>' +
         '</div>' +
         '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">' +
