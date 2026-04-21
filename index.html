@@ -27,29 +27,22 @@ textarea{resize:vertical;min-height:60px;}
 .btn-p{background:var(--rojo);color:#fff;}
 .btn-s{background:var(--gc);color:var(--gris);border:1px solid var(--bd);}
 .btn-pdf{background:var(--azul);color:#fff;}
-.trab-card{background:#eef5fd;border:1px solid #b3d4f5;border-radius:6px;padding:10px;margin-bottom:10px;}
-.trab-name{font-size:13px;font-weight:600;color:var(--azul);}
-.trab-det{font-size:11px;color:var(--gm);margin-top:2px;}
 .hidden{display:none!important;}
 .planta-bar{background:linear-gradient(135deg,#2c2c2c,#444);color:#fff;border-radius:8px;padding:14px;margin-bottom:12px;display:flex;align-items:center;gap:10px;}
 .pi{background:var(--rojo);width:44px;height:44px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
-.pn{font-size:15px;font-weight:600;}.ps{font-size:11px;opacity:.7;margin-top:2px;}
 .steps{display:flex;margin-bottom:16px;}
 .step{flex:1;text-align:center;padding:7px 2px;font-size:10px;font-family:'IBM Plex Mono',monospace;color:var(--gm);border-bottom:2px solid var(--bd);text-transform:uppercase;}
 .step.active{color:var(--rojo);border-bottom-color:var(--rojo);font-weight:600;}
 .step.done{color:var(--verde);border-bottom-color:var(--verde);}
 .num-box{display:flex;align-items:center;gap:12px;background:var(--gc);border-radius:6px;padding:12px;margin-bottom:10px;}
-.num-box label{margin:0;white-space:nowrap;}
 .num-box input{width:80px;text-align:center;font-size:18px;font-weight:600;}
 .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin-bottom:12px;}
 table.ext{border-collapse:collapse;min-width:1400px;width:100%;font-size:11px;}
 table.ext th{background:var(--gris);color:#fff;padding:6px 8px;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:10px;white-space:nowrap;}
 table.ext td{padding:5px 6px;border:1px solid #e0e0e0;vertical-align:middle;background:#fff;}
 table.ext tr:nth-child(even) td{background:#fafafa;}
-table.ext td input,table.ext td select{padding:5px 7px;font-size:12px;border-radius:4px;}
 .cns{display:flex;border-radius:4px;overflow:hidden;border:1.5px solid var(--bd);min-width:90px;}
 .cb2{flex:1;padding:5px 2px;text-align:center;font-size:10px;font-weight:700;font-family:'IBM Plex Mono',monospace;cursor:pointer;border:none;background:#fff;color:var(--gm);border-right:1px solid var(--bd);}
-.cb2:last-child{border-right:none;}
 .cb2.ac{background:var(--verde);color:#fff;}
 .cb2.anc{background:var(--rojo);color:#fff;}
 .cb2.ana{background:#888;color:#fff;}
@@ -59,17 +52,9 @@ table.ext td input,table.ext td select{padding:5px 7px;font-size:12px;border-rad
 .res-title{font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:600;margin-bottom:4px;}
 .res-box.ap .res-title{color:var(--verde);}
 .res-box.nap .res-title{color:var(--rojo);}
-.nc-item{background:var(--rojo-l);border-left:3px solid var(--rojo);padding:6px 10px;margin-bottom:4px;border-radius:0 4px 4px 0;font-size:11px;color:var(--rojo-d);font-weight:500;}
-#pdfWrap{display:none;background:#fff;border:1px solid var(--bd);border-radius:8px;overflow:hidden;margin-bottom:12px;}
-.pdf-hdr{background:var(--gris);color:#fff;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;font-size:11px;}
-.pdf-body{padding:16px;font-size:11px;}
-@media print{
-  .header,.steps,.planta-bar,.card,.btn,.res-box{display:none!important;}
-  #p4{display:block!important;}
-  #pdfWrap{display:block!important;border:none!important;}
-  .pdf-hdr{display:none!important;}
-  body{background:#fff;}
-}
+.trab-card{background:#eef5fd;border:1px solid #b3d4f5;border-radius:6px;padding:10px;margin-bottom:10px;}
+.trab-name{font-size:13px;font-weight:600;color:var(--azul);}
+.trab-det{font-size:11px;color:var(--gm);margin-top:2px;}
 </style>
 </head>
 <body>
@@ -77,12 +62,11 @@ table.ext td input,table.ext td select{padding:5px 7px;font-size:12px;border-rad
   <div class="h-logo">UCEM</div>
   <div class="h-title">Inspección de Extintores · Chimborazo</div>
   <div class="h-badge">FSI-013 v02</div>
-  <button onclick="goRegistros()" style="margin-left:8px;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:#fff;padding:4px 10px;border-radius:4px;font-size:11px;cursor:pointer">📋 Registros</button>
 </div>
 <div class="wrap">
   <div class="planta-bar">
     <div class="pi">🏭</div>
-    <div><div class="pn">Planta Chimborazo</div><div class="ps">Unión Cementera Nacional UCEM S.A.</div></div>
+    <div><div style="font-size:15px;font-weight:600">Planta Chimborazo</div><div style="font-size:11px;opacity:.7">Unión Cementera Nacional UCEM S.A.</div></div>
   </div>
   <div class="steps">
     <div class="step active" id="s1">1. Inspector</div>
@@ -91,7 +75,6 @@ table.ext td input,table.ext td select{padding:5px 7px;font-size:12px;border-rad
     <div class="step" id="s4">4. Resultado</div>
   </div>
 
-  <!-- P1 -->
   <div id="p1" class="card">
     <div class="ch"><span class="n">1</span> Datos del inspector</div>
     <div class="cb">
@@ -103,24 +86,15 @@ table.ext td input,table.ext td select{padding:5px 7px;font-size:12px;border-rad
         <div class="trab-name" id="tNom"></div>
         <div class="trab-det" id="tDet"></div>
       </div>
-      <div id="tErr" class="hidden" style="color:var(--rojo);font-size:12px;margin-bottom:8px;">Código no encontrado</div>
       <button class="btn btn-p" id="btnP2">Continuar →</button>
     </div>
   </div>
 
-  <!-- P2 -->
   <div id="p2" class="hidden card">
     <div class="ch"><span class="n">2</span> Selección de área</div>
     <div class="cb">
       <div class="field"><label>Área a inspeccionar</label>
         <select id="areaS"><option value="">-- Seleccione área --</option></select>
-      </div>
-      <div style="text-align:right;margin-bottom:10px;margin-top:-6px;">
-        <button onclick="toggleGestionAreas()" style="background:none;border:none;color:var(--rojo);font-size:11px;font-weight:600;cursor:pointer;text-decoration:underline">⚙ Gestionar áreas/ubicaciones agregadas ★</button>
-      </div>
-      <div id="modalGestionAreas" style="display:none;background:#fff5f5;border:1.5px solid #f5b7b1;border-radius:8px;padding:12px;margin-bottom:10px;">
-        <div style="font-size:12px;font-weight:600;color:var(--rojo);margin-bottom:8px;">Áreas y ubicaciones personalizadas ★</div>
-        <div id="listaAreasCustom"></div>
       </div>
       <div class="num-box">
         <label>¿Cuántos extintores hay?</label>
@@ -131,299 +105,132 @@ table.ext td input,table.ext td select{padding:5px 7px;font-size:12px;border-rad
     </div>
   </div>
 
-  <!-- P3 -->
   <div id="p3" class="hidden">
     <div class="card">
       <div class="ch"><span class="n">3</span> Registro de extintores</div>
-      <div class="cb" style="padding:10px;">
+      <div class="cb">
         <div class="tbl-wrap">
           <table class="ext">
             <thead>
               <tr>
-                <th>#</th><th>UBICACIÓN</th><th>TIPO</th><th>CAPACIDAD (LB)</th><th>MARCA</th>
-                <th>PINTURA</th><th>GOLPES</th><th>AUTOADHESIVO FECHA/MTTO</th>
-                <th>MANIJA TRANSPORTE</th><th>MANIJA DISPARO</th><th>PRESIÓN</th>
-                <th>MANÓMETRO</th><th>BOQUILLA</th><th>MANGUERA</th>
-                <th>RING/ARO SEGURIDAD</th><th>CORNETA</th><th>SEÑALIZACIÓN</th>
-                <th>SOPORTE/COLGAR/RUEDAS</th><th>FECHA PRÓX. RECARGA</th>
-                <th>OBSERVACIONES</th><th>TIPO SERVICIO PRÓX. AÑO</th>
+                <th>#</th><th>UBICACIÓN</th><th>TIPO</th><th>CAP.</th><th>MARCA</th>
+                <th>PINTURA</th><th>GOLPES</th><th>ADHESIVO</th><th>M. TRANS.</th><th>M. DISP.</th><th>PRESIÓN</th><th>MANOM.</th><th>BOQ.</th><th>MANG.</th><th>RING</th><th>CORN.</th><th>SEÑAL.</th><th>SOPORTE</th>
+                <th>FECHA RECARGA</th><th>OBSERVACIONES</th><th>SERVICIO</th>
               </tr>
             </thead>
             <tbody id="extBody"></tbody>
           </table>
         </div>
         <button class="btn btn-p" id="btnCalc">Ver resultado →</button>
-        <button class="btn btn-s" id="btnP2b">← Atrás</button>
-        <button onclick="toggleGestionarUbics()" style="width:100%;padding:9px;border:1.5px dashed #b3d4f5;border-radius:6px;background:#f0f7ff;color:var(--azul);font-size:12px;font-weight:600;cursor:pointer;margin-top:4px">⚙ Gestionar ubicaciones agregadas ★</button>
-        <div id="gestionUbics" style="display:none;background:#eef5fd;border:1px solid #b3d4f5;border-radius:6px;padding:12px;margin-top:6px;">
-          <div style="font-size:11px;font-weight:600;color:var(--azul);margin-bottom:8px;">Ubicaciones personalizadas ★</div>
-          <div id="listaUbicsCustom"></div>
-        </div>
       </div>
     </div>
   </div>
 
-  <!-- P4 -->
   <div id="p4" class="hidden">
     <div id="resBox"></div>
-    <div id="pdfWrap">
-      <div class="pdf-hdr"><span>📄 Informe de Inspección</span><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;">FSI-013 | Rev.02 | 27-10-2025</span></div>
-      <div class="pdf-body" id="pdfBody"></div>
-    </div>
-    <button class="btn btn-pdf" onclick="window.print()">⬇ Descargar / Imprimir PDF</button>
-    <button class="btn btn-p" id="btnGuardar" style="background:#1a7a4a">💾 Guardar registro</button>
-    <button class="btn btn-s" id="btnNueva">+ Nueva inspección</button>
-    <button onclick="goRegistros()" style="width:100%;padding:9px;border:1.5px solid #b3d4f5;border-radius:6px;background:#f0f7ff;color:var(--azul);font-size:12px;font-weight:600;cursor:pointer;margin-top:4px">📋 Ver registros</button>
-  </div>
-
-  <!-- MODAL DUPLICAR -->
-  <div id="modalDuplicar" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:999;align-items:center;justify-content:center;">
-    <div style="background:#fff;border-radius:10px;padding:20px;width:90%;max-width:400px;margin:auto;margin-top:20%">
-      <div style="font-size:14px;font-weight:600;margin-bottom:14px;color:var(--gris)">Duplicar inspección</div>
-      <div class="field"><label>Nº Inspección</label><input type="text" id="dupNInsp" placeholder="Ej: 02"></div>
-      <div class="field"><label>Área</label><select id="dupArea"><option value="">-- Seleccione área --</option></select></div>
-      <div style="display:flex;gap:8px;margin-top:10px">
-        <button onclick="confirmarDuplicar()" style="flex:1;padding:10px;background:var(--azul);color:#fff;border:none;border-radius:6px;font-weight:600;font-size:13px;cursor:pointer">Duplicar</button>
-        <button onclick="document.getElementById('modalDuplicar').style.display='none'" style="flex:1;padding:10px;background:var(--gc);color:var(--gris);border:1px solid var(--bd);border-radius:6px;font-weight:600;font-size:13px;cursor:pointer">Cancelar</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- REGISTROS -->
-  <div id="pReg" class="hidden">
-    <div class="card">
-      <div class="ch"><span class="n" style="background:var(--azul)">R</span> Registro de inspecciones</div>
-      <div class="cb" id="regBody" style="padding:10px;"></div>
-    </div>
-    <button class="btn btn-s" id="btnVolverReg">← Volver</button>
+    <button class="btn btn-p" id="btnGuardar">💾 Guardar registro</button>
+    <button class="btn btn-s" onclick="location.reload()">+ Nueva inspección</button>
   </div>
 </div>
 
 <script>
-// URL ACTUALIZADA SEGÚN TU MENSAJE
-var APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxrDwJWurYsY7l6sHU0AHJoY41Nlbuj3As0dod3FTmATyMndn7pHTDaNFOXl4Q8Pc1QLw/exec';
+// URL ACTUALIZADA
+var APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxFbM4Y9r4TG9uxGVXMMKhsEmWA1P4WdG_lJhDNwD_qcwF-WFe_Da_18OHzMTJd63Q/exec';
 var ITEMS = ['PINTURA','GOLPES','AUTOADHESIVO FECHA/MTTO','MANIJA TRANSPORTE','MANIJA DISPARO','PRESIÓN','MANÓMETRO','BOQUILLA','MANGUERA','RING/ARO SEGURIDAD','CORNETA','SEÑALIZACIÓN','SOPORTE/COLGAR/RUEDAS'];
-var TIPOS = ['PQS','CO2','Tipo K'];
-var CAPS = ['2.5','5','10','15','20','25','50','100','125','150'];
-var SERVICIOS = ['RECARGA','MANTENIMIENTO','PRUEBA HIDROSTÁTICA'];
-var tActual = null;
-var _editIndex = null;
-
 var TRABAJADORES = [
   {c:"23452",n:"JESSICA ELIZABETH CHAVEZ GRANIZO",cargo:"INSPECTOR SEGURIDAD INTEGRAL",p:"CHIMBORAZO"},
   {c:"157686",n:"DAVID MARCELO NAULA APUGLLON",cargo:"INSPECTOR SEGURIDAD INTEGRAL",p:"CHIMBORAZO"},
   {c:"15648",n:"BYRON ANIBAL PEREZ ZAVALA",cargo:"INSPECTOR SEGURIDAD INTEGRAL",p:"CHIMBORAZO"},
-  {c:"34737",n:"JOSE PATRICIO PILCO PILCO",cargo:"JEFE SEGURIDAD INTEGRAL",p:"CHIMBORAZO"},
-  {c:"34738",n:"BYRON ROBERTO SAGÑAY CASTAÑEDA",cargo:"INSPECTOR SEGURIDAD INTEGRAL",p:"CHIMBORAZO"},
-  {c:"133311",n:"JUAN PABLO YUQUILEMA VILEMA",cargo:"INSPECTOR SEGURIDAD INTEGRAL",p:"CHIMBORAZO"},
-  {c:"159400",n:"PAUL ALEXANDER RODRIGUEZ ZAMBRANO",cargo:"GERENTE SEGURIDAD INTEGRAL",p:"CHIMBORAZO"}
+  {c:"34737",n:"JOSE PATRICIO PILCO PILCO",cargo:"JEFE SEGURIDAD INTEGRAL",p:"CHIMBORAZO"}
 ];
-</script>
-<script id="dataScript">
-var DATA = {"TORRE DE CALCINACIÓN":[{"ubicacion":"MCC COMPRESORES","tipo":"CO2","capacidad":"20","marca":"BUCKEYE"},{"ubicacion":"PARTE EXTERNA DE TRANSFORMADOR","tipo":"PQS","capacidad":"20","marca":"BUCKEYE"},{"ubicacion":"NIVEL 0 TORRE DE CALCINACIÓN","tipo":"PQS","capacidad":"20","marca":"BUCKEYE"},{"ubicacion":"ACCESO A LAS GRADAS DEL EDIFICIO DE PREMEZCLA NIVEL 0","tipo":"PQS","capacidad":"20","marca":"BUCKEYE"},{"ubicacion":"INGRESO DE AERODESLIZADORES A LOS ELEVADORES ENTRE NIVEL 0 Y NIVEL 1","tipo":"PQS","capacidad":"20","marca":"BUCKEYE"},{"ubicacion":"NIVEL 1: ACCESO A LAS GRADAS","tipo":"PQS","capacidad":"20","marca":"BUCKEYE"},{"ubicacion":"NIVEL 1: ACCESO A ASCENSOR","tipo":"PQS","capacidad":"20","marca":"BUCKEYE"},{"ubicacion":"NIVEL 1:  BIES LADO DE LAS GRADAS","tipo":"PQS","capacidad":"20","marca":"BUCKEYE"},{"ubicacion":"NIVEL 1:  BIES LADO DEL ASCENSOR","tipo":"PQS","capacidad":"20","marca":"BUCKEYE"},{"ubicacion":"NIVEL 1:  Ranfla","tipo":"CO2","capacidad":"20","marca":"BUCKEYE"},{"ubicacion":"NIVEL 2 : ACCESO A LAS GRADAS","tipo":"PQS","capacidad":"20","marca":"BUCKEYE"},{"ubicacion":"NIVEL 2 : ACCESO A ASCENSOR","tipo":"PQS","capacidad":"20","marca":"BUCKEYE"},{"ubicacion":"NIVEL 3 : ACCESO A LAS GRADAS","tipo":"PQS","capacidad":"20","marca":"BUCKEYE"},{"ubicacion":"NIVEL 3 : ACCESO A ASCENSOR","tipo":"PQS","capacidad":"20","marca":"BUCKEYE"},{"ubicacion":"NIVEL 4 : ACCESO A LAS GRADAS","tipo":"PQS","capacidad":"20","marca":"BUCKEYE"},{"ubicacion":"NIVEL 4 : ACCESO A ASCENSOR","tipo":"PQS","capacidad":"20","marca":"BUCKEYE"},{"ubicacion":"NIVEL 5: ACCESO A LAS GRADAS","tipo":"PQS","capacidad":"20","marca":"BUCKEYE"},{"ubicacion":"NIVEL 5:  ACCESO A ASCENSOR","tipo":"PQS","capacidad":"20","marca":"BUCKEYE"},{"ubicacion":"NIVEL 5:  PLATAFORMA NIVEL 2","tipo":"PQS","capacidad":"20","marca":"BUCKEYE"},{"ubicacion":"NIVEL 6: ACCESO A LAS GRADAS","tipo":"PQS","capacidad":"20","marca":"BUCKEYE"},{"ubicacion":"NIVEL 6: ACCESO A ASCENSOR","tipo":"PQS","capacidad":"20","marca":"BUCKEYE"},{"ubicacion":"NIVEL 7: ACCESO A LAS GRADAS","tipo":"PQS","capacidad":"20","marca":"BUCKEYE"},{"ubicacion":"NIVEL 7: ACCESO A ASCENSOR","tipo":"PQS","capacidad":"20","marca":"BUCKEYE"},{"ubicacion":"NIVEL 8: ACCESO A LAS GRADAS","tipo":"PQS","capacidad":"20","marca":"BUCKEYE"},{"ubicacion":"NIVEL 8: ACCESO A ASCENSOR","tipo":"PQS","capacidad":"20","marca":"BUCKEYE"},{"ubicacion":"MCC-TORRE Y HORNO-COMPUERTA DE ACCESO 1 A TRANSFORMADOR","tipo":"PQS","capacidad":"20","marca":"BUCKEYE"},{"ubicacion":"MCC-TORRE Y HORNO-COMPUERTA DE ACCESO 2 A TRANSFORMADOR","tipo":"PQS","capacidad":"20","marca":"BUCKEYE"}],"MCC HORNO":[{"ubicacion":"MCC HORNO PUERTA INGRESO","tipo":"CO2","capacidad":"20","marca":"BUCKEYE"},{"ubicacion":"MCC HORNO PUERTA  SALIDA","tipo":"PQS","capacidad":"20","marca":"BUCKEYE"}],"MCC MOLINO DE CRUDO":[{"ubicacion":"MCC  PUERTA DE INGRESO","tipo":"CO2","capacidad":"20","marca":"BUCKEYE"},{"ubicacion":"MCC PUERTA DE SALIDA","tipo":"CO2","capacidad":"20","marca":"BUCKEYE"}],"MCC HORNO MOLINO CUARTO DE BANDEJAS ELECTRICAS":[{"ubicacion":"CUARTO ELECTRICO INGRESO 1","tipo":"PQS","capacidad":"20","marca":"BUCKEYE"},{"ubicacion":"CUARTO ELECTRICO PUERTA DE SALIDA","tipo":"CO2","capacidad":"20","marca":"BUCKEYE"}],"CUARTO COMPRESORES":[{"ubicacion":"INGRESO CUARTO DE COMPRESORES","tipo":"PQS","capacidad":"20","marca":"BUCKEYE"}],"COMEDOR":[{"ubicacion":"Ingreso Gabinete","tipo":"PQS","capacidad":"10","marca":"CHINO"},{"ubicacion":"Puerta ingreso","tipo":"CO2","capacidad":"10","marca":"BUCKEYE"},{"ubicacion":"Comedor","tipo":"COLD FIRE","capacidad":"2.5","marca":"BUCKEYE"},{"ubicacion":"Comedor bodega","tipo":"COLD FIRE","capacidad":"2.5","marca":"BUCKEYE"}],"TRANSFORMADOR":[{"ubicacion":"Ingreso","tipo":"CO2","capacidad":"20","marca":"BUCKEYE"},{"ubicacion":"Ingreso","tipo":"CO2","capacidad":"10","marca":"BUCKEYE"}],"LABORATORIO":[{"ubicacion":"Pasillo","tipo":"CO2","capacidad":"10","marca":"BUCKEYE"},{"ubicacion":"Laboratorio de RX","tipo":"CO2","capacidad":"10","marca":"BUCKEYE"},{"ubicacion":"Ensayos Fisicos","tipo":"PQS","capacidad":"10","marca":"CHINO"}],"OFICINAS GERENCIAS PISO 2":[{"ubicacion":"Sala de reuniones","tipo":"CO2","capacidad":"10","marca":"BUCKEYE"}],"OFICINAS GERENCIAS PISO 3":[{"ubicacion":"Ingreso","tipo":"CO2","capacidad":"10","marca":"BUCKEYE"}],"PISO 3":[{"ubicacion":"Oficinas Administrativas","tipo":"CO2","capacidad":"10","marca":"BUCKEYE"}],"PISO 4":[{"ubicacion":"Cambiadores","tipo":"CO2","capacidad":"10","marca":"BUCKEYE"}],"PISO 5":[{"ubicacion":"Servidores","tipo":"CO2","capacidad":"10","marca":"BUCKEYE"}],"PISO 6":[{"ubicacion":"Oficina Supervisor","tipo":"CO2","capacidad":"10","marca":"BUCKEYE"}],"PISO 7":[{"ubicacion":"COP","tipo":"CO2","capacidad":"10","marca":"BUCKEYE"}],"PISO 8":[{"ubicacion":"Gabinete","tipo":"PQS","capacidad":"10","marca":"CHINO"}]};
-</script>
-<script>
+var DATA = {"TORRE DE CALCINACIÓN":[{"ubicacion":"MCC COMPRESORES","tipo":"CO2","capacidad":"20","marca":"BUCKEYE"},{"ubicacion":"NIVEL 0 TORRE","tipo":"PQS","capacidad":"20","marca":"BUCKEYE"}],"MCC HORNO":[{"ubicacion":"PUERTA INGRESO","tipo":"CO2","capacidad":"20","marca":"BUCKEYE"}]};
+var tActual = null;
+
 window.onload = function() {
-  cargarAreas();
-  document.getElementById('codInput').addEventListener('input', function() { buscar(this.value); });
-  document.getElementById('btnP2').addEventListener('click', goP2);
-  document.getElementById('btnP3').addEventListener('click', goP3);
-  document.getElementById('btnP1b').addEventListener('click', goP1);
-  document.getElementById('btnP2b').addEventListener('click', goP2);
-  document.getElementById('btnCalc').addEventListener('click', calcRes);
-  document.getElementById('btnGuardar').addEventListener('click', guardarRegistro);
-  document.getElementById('btnNueva').addEventListener('click', resetApp);
-  document.getElementById('btnVolverReg').addEventListener('click', goP1);
+  var sel = document.getElementById('areaS');
+  Object.keys(DATA).sort().forEach(a => { sel.innerHTML += `<option value="${a}">${a}</option>`; });
+  document.getElementById('codInput').oninput = function() {
+    tActual = TRABAJADORES.find(t => t.c === this.value.trim());
+    document.getElementById('tCard').className = tActual ? 'trab-card' : 'hidden';
+    if(tActual){ document.getElementById('tNom').innerText = tActual.n; document.getElementById('tDet').innerText = tActual.cargo; }
+  };
+  document.getElementById('btnP2').onclick = () => { if(tActual) show('p2', 2); };
+  document.getElementById('btnP3').onclick = () => { buildTable(); show('p3', 3); };
+  document.getElementById('btnCalc').onclick = () => { calc(); show('p4', 4); };
+  document.getElementById('btnGuardar').onclick = guardar;
 };
 
-function cargarAreas() {
-  var sel = document.getElementById('areaS');
-  var dupSel = document.getElementById('dupArea');
-  var prev = sel.value;
-  sel.innerHTML = '<option value="">-- Seleccione área --</option>';
-  dupSel.innerHTML = '<option value="">-- Seleccione área --</option>';
-  var custom = JSON.parse(localStorage.getItem('ucem_custom_areas') || '{}');
-  var areas = Object.keys(DATA).sort();
-  var customAreas = Object.keys(custom).sort();
-  customAreas.forEach(function(a) { if (areas.indexOf(a) < 0) areas.push(a); });
-  areas.sort().forEach(function(a) {
-    var o = document.createElement('option');
-    o.value = a; o.textContent = a + (custom[a] ? ' ★' : '');
-    sel.appendChild(o);
-    var o2 = document.createElement('option');
-    o2.value = a; o2.textContent = a + (custom[a] ? ' ★' : '');
-    dupSel.appendChild(o2);
-  });
-  if (prev) sel.value = prev;
-}
-
-function buscar(v) {
-  var t = null;
-  for (var i = 0; i < TRABAJADORES.length; i++) {
-    if (TRABAJADORES[i].c === v.trim()) { t = TRABAJADORES[i]; break; }
-  }
-  var card = document.getElementById('tCard');
-  var err = document.getElementById('tErr');
-  if (t) {
-    tActual = t;
-    document.getElementById('tNom').textContent = t.n;
-    document.getElementById('tDet').textContent = t.cargo + ' · Planta ' + t.p;
-    card.classList.remove('hidden');
-    err.classList.add('hidden');
-  } else {
-    tActual = null;
-    card.classList.add('hidden');
-    if (v.length >= 3) err.classList.remove('hidden');
-    else err.classList.add('hidden');
-  }
-}
-
-function goP1() { show('p1'); setS(1); }
-function goP2() { if (!tActual) { alert('Ingresa un código de trabajador válido.'); return; } show('p2'); setS(2); }
-function goP3() {
+function buildTable() {
   var area = document.getElementById('areaS').value;
-  var n = parseInt(document.getElementById('numExt').value) || 1;
-  if (!area) { alert('Selecciona un área.'); return; }
-  buildTable(area, n);
-  show('p3'); setS(3);
-}
-
-function buildTable(area, n) {
-  var custom = JSON.parse(localStorage.getItem('ucem_custom_areas') || '{}');
-  var baseUbics = DATA[area] || [];
-  var customUbics = custom[area] || [];
-  var ubics = baseUbics.concat(customUbics);
-  var tbody = document.getElementById('extBody');
-  tbody.innerHTML = '';
-
-  for (var i = 0; i < n; i++) {
-    var pre = ubics[i] || {};
-    var ubOpts = '';
-    for (var j = 0; j < ubics.length; j++) {
-      ubOpts += '<option value="' + ubics[j].ubicacion + '"' + (j === i ? ' selected' : '') + '>' + ubics[j].ubicacion + '</option>';
-    }
-    var tipoOpts = '';
-    for (var t = 0; t < TIPOS.length; t++) { tipoOpts += '<option value="' + TIPOS[t] + '"' + (TIPOS[t] === (pre.tipo || '') ? ' selected' : '') + '>' + TIPOS[t] + '</option>'; }
-    var capVal = (pre.capacidad || '').replace(' Lbs','').replace(' lb','').trim();
-    var capsOpts = '';
-    for (var c = 0; c < CAPS.length; c++) { capsOpts += '<option value="' + CAPS[c] + '"' + (CAPS[c] === capVal ? ' selected' : '') + '>' + CAPS[c] + ' Lbs</option>'; }
-    var srvOpts = '<option value="">--</option>';
-    for (var s = 0; s < SERVICIOS.length; s++) { srvOpts += '<option value="' + SERVICIOS[s] + '">' + SERVICIOS[s] + '</option>'; }
-    var cnsHTML = '';
-    for (var k = 0; k < ITEMS.length; k++) {
-      cnsHTML += '<td><div class="cns"><button class="cb2" type="button">C</button><button class="cb2" type="button">NC</button><button class="cb2" type="button">NA</button></div></td>';
-    }
-    var tr = document.createElement('tr');
-    tr.innerHTML = '<td>' + (i+1) + '</td><td><select id="ubicSel-' + i + '">' + ubOpts + '</select></td><td><select>' + tipoOpts + '</select></td><td><select>' + capsOpts + '</select></td><td><input type="text" value="' + (pre.marca || '') + '"></td>' + cnsHTML + '<td><input type="date"></td><td><textarea></textarea></td><td><select>' + srvOpts + '</select></td>';
-    tbody.appendChild(tr);
+  var n = document.getElementById('numExt').value;
+  var html = '';
+  for(var i=0; i<n; i++) {
+    var pre = (DATA[area] && DATA[area][i]) ? DATA[area][i] : {ubicacion:'', tipo:'', capacidad:'', marca:''};
+    html += `<tr><td>${i+1}</td>
+      <td><input type="text" value="${pre.ubicacion}"></td>
+      <td><input type="text" value="${pre.tipo}"></td>
+      <td><input type="text" value="${pre.capacidad}"></td>
+      <td><input type="text" value="${pre.marca}"></td>`;
+    for(var k=0; k<13; k++) html += `<td><div class="cns"><button class="cb2" onclick="set(this,'C')">C</button><button class="cb2" onclick="set(this,'NC')">NC</button></div></td>`;
+    html += `<td><input type="date"></td><td><textarea></textarea></td><td><select><option value="MANTENIMIENTO">MTTO</option><option value="RECARGA">RECARGA</option></select></td></tr>`;
   }
-  tbody.querySelectorAll('.cb2').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-      var p = this.parentElement;
-      p.querySelectorAll('.cb2').forEach(function(b) { b.className = 'cb2'; });
-      if (this.textContent === 'C') this.classList.add('ac');
-      else if (this.textContent === 'NC') this.classList.add('anc');
-      else this.classList.add('ana');
-    });
-  });
+  document.getElementById('extBody').innerHTML = html;
 }
 
-function getVal(btn) {
-  if (btn.classList.contains('ac')) return 'C';
-  if (btn.classList.contains('anc')) return 'NC';
-  if (btn.classList.contains('ana')) return 'NA';
-  return '';
+function set(btn, v) {
+  var p = btn.parentElement;
+  p.querySelectorAll('button').forEach(b => b.className = 'cb2');
+  btn.classList.add(v === 'C' ? 'ac' : 'anc');
 }
 
-function calcRes() {
+function calc() {
   var rows = document.querySelectorAll('#extBody tr');
-  var allFilled = true;
-  var rowData = [];
-  var ncTotalCount = 0;
+  var ncs = 0;
+  rows.forEach(r => { if(r.querySelector('.anc')) ncs++; });
+  document.getElementById('resBox').className = ncs > 0 ? 'res-box nap' : 'res-box ap';
+  document.getElementById('resBox').innerHTML = `<div class="res-title">${ncs > 0 ? '✗ NO OPERATIVO' : '✓ OPERATIVO'}</div><p>${ncs} fallas encontradas</p>`;
+}
 
-  rows.forEach(function(tr, i) {
-    var cells = tr.querySelectorAll('td');
-    var itemVals = [];
-    var rowNCs = [];
-    for (var k = 0; k < 13; k++) {
-      var active = cells[5+k].querySelector('.ac, .anc, .ana');
-      var v = active ? getVal(active) : '';
-      if (!v) allFilled = false;
-      if (v === 'NC') { rowNCs.push(ITEMS[k]); ncTotalCount++; }
-      itemVals.push(v);
-    }
-    rowData.push({
-      ubic: cells[1].querySelector('select').value,
-      tipo: cells[2].querySelector('select').value,
-      cap: cells[3].querySelector('select').value,
-      marca: cells[4].querySelector('input').value,
-      itemVals: itemVals,
-      fecha: cells[18].querySelector('input').value,
-      obs: cells[19].querySelector('textarea').value,
-      srv: cells[20].querySelector('select').value,
-      operativo: rowNCs.length === 0,
-      rowNCs: rowNCs
+function guardar() {
+  var btn = document.getElementById('btnGuardar');
+  btn.disabled = true; btn.innerText = '⏳ Guardando...';
+  var extintores = [];
+  document.querySelectorAll('#extBody tr').forEach((r, idx) => {
+    var vals = Array.from(r.querySelectorAll('.cns')).map(c => {
+      var sel = c.querySelector('.ac, .anc');
+      return sel ? (sel.innerText) : 'NA';
+    });
+    extintores.push({
+      ubic: r.cells[1].querySelector('input').value,
+      tipo: r.cells[2].querySelector('input').value,
+      cap: r.cells[3].querySelector('input').value,
+      marca: r.cells[4].querySelector('input').value,
+      itemVals: vals,
+      fecha: r.cells[18].querySelector('input').value,
+      obs: r.cells[19].querySelector('textarea').value,
+      srv: r.cells[20].querySelector('select').value,
+      operativo: !r.querySelector('.anc')
     });
   });
 
-  if (!allFilled) { alert('Completa todos los items C/NC/NA.'); return; }
-  show('p4'); setS(4);
-  renderRes(ncTotalCount, rowData);
-}
-
-function renderRes(ncCount, rowData) {
-  var area = document.getElementById('areaS').value;
-  var nInsp = document.getElementById('nInsp').value;
-  var fecha = new Date().toLocaleDateString('es-EC');
-  var operativoGlobal = ncCount === 0;
-  var rb = document.getElementById('resBox');
-  rb.className = 'res-box ' + (operativoGlobal ? 'ap' : 'nap');
-  rb.innerHTML = '<div class="res-title">' + (operativoGlobal ? '✓ OPERATIVO' : '✗ NO OPERATIVO') + '</div>';
-
-  window._lastResult = { fecha: fecha, nInsp: nInsp, area: area, rowData: rowData, operativoGlobal: operativoGlobal };
-}
-
-function guardarRegistro() {
-  var d = window._lastResult;
-  if (!d) return;
-  var btn = document.getElementById('btnGuardar');
-  btn.disabled = true; btn.textContent = '⏳ Guardando...';
-  var ahora = new Date();
-  var fechaG = ahora.toLocaleDateString('es-EC') + ' ' + ahora.toLocaleTimeString('es-EC', {hour:'2-digit',minute:'2-digit'});
-  
-  guardarEnSheets(d.fecha, d.nInsp, d.area, d.rowData, fechaG);
-}
-
-function guardarEnSheets(fecha, nInsp, area, rowData, fechaG) {
-  var payload = {
-    fecha: fecha, nInsp: nInsp, area: area, fechaGuardado: fechaG,
-    planta: 'Planta Chimborazo',
-    accion: 'nuevo',
-    responsable: tActual.n, cargo: tActual.cargo,
-    extintores: rowData.map(function(r) {
-      return { ubic: r.ubic, tipo: r.tipo, cap: r.cap, marca: r.marca, itemVals: r.itemVals, fecha: r.fecha, obs: r.obs, srv: r.srv, operativo: r.operativo };
+  fetch(APPS_SCRIPT_URL, {
+    method: 'POST',
+    body: JSON.stringify({
+      planta: 'Planta Chimborazo',
+      nInsp: document.getElementById('nInsp').value,
+      area: document.getElementById('areaS').value,
+      responsable: tActual.n,
+      cargo: tActual.cargo,
+      extintores: extintores
     })
-  };
-  fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) })
-    .then(function(res) { return res.json(); })
-    .then(function(data) {
-      if (data.status === 'ok') {
-        document.getElementById('btnGuardar').textContent = '✓ Guardado';
-        document.getElementById('btnGuardar').style.background = '#0f6e56';
-      }
-    }).catch(function(err) { console.error(err); });
+  }).then(() => { btn.innerText = '✓ Guardado con éxito'; btn.style.background = '#1a7a4a'; });
 }
 
-function show(id) {
-  ['p1','p2','p3','p4','pReg'].forEach(function(p) { document.getElementById(p).classList.add('hidden'); });
+function show(id, s) {
+  ['p1','p2','p3','p4'].forEach(p => document.getElementById(p).classList.add('hidden'));
   document.getElementById(id).classList.remove('hidden');
+  for(var i=1; i<=4; i++) document.getElementById('s'+i).className = 'step' + (i<s ? ' done' : i===s ? ' active' : '');
 }
-
-function setS(n) {
-  for (var i = 1; i <= 4; i++) { document.getElementById('s' + i).className = 'step' + (i < n ? ' done' : i === n ? ' active' : ''); }
-}
-
-function resetApp() { location.reload(); }
 </script>
 </body>
 </html>
