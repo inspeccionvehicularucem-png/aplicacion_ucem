@@ -340,13 +340,16 @@ function buildTable(area, n) {
     }
 
     // cns items
+    // cns items con observaciones por NC
     var cnsHTML = '';
     for (var k = 0; k < ITEMS.length; k++) {
       cnsHTML += '<td><div class="cns">';
       cnsHTML += '<button class="cb2" type="button">C</button>';
       cnsHTML += '<button class="cb2" type="button">NC</button>';
       cnsHTML += '<button class="cb2" type="button">NA</button>';
-      cnsHTML += '</div></td>';
+      cnsHTML += '</div>';
+      cnsHTML += '<div id="ncObs-' + i + '-' + k + '" style="display:none;margin-top:4px"><input type="text" placeholder="¿Por qué NC?" style="font-size:11px;padding:4px 6px;min-width:120px;border:1px solid var(--rojo);border-radius:4px;"></div>';
+      cnsHTML += '</td>';
     }
 
     var tr = document.createElement('tr');
@@ -384,6 +387,36 @@ function buildTable(area, n) {
       if (this === btns[0]) this.classList.add('ac');
       else if (this === btns[1]) this.classList.add('anc');
       else this.classList.add('ana');
+      // Mostrar/ocultar cuadro de obs NC
+      var td = parent.parentElement;
+      var obsDiv = td.querySelector('div[id^="ncObs"]');
+      if (obsDiv) obsDiv.style.display = this.classList.contains('anc') ? 'block' : 'none';
+    });
+  });
+
+  // Detectar fecha vencida → marcar NO OPERATIVO automáticamente
+  var fechaInputs = tbody.querySelectorAll('input[type="date"]');
+  fechaInputs.forEach(function(inp) {
+    inp.addEventListener('change', function() {
+      if (!this.value) return;
+      var hoy = new Date(); hoy.setHours(0,0,0,0);
+      var fechaRec = new Date(this.value);
+      var tr = this.closest('tr');
+      if (fechaRec < hoy) {
+        var badge = tr.querySelector('.fecha-vencida-badge');
+        if (!badge) {
+          badge = document.createElement('div');
+          badge.className = 'fecha-vencida-badge';
+          badge.style.cssText = 'background:#fdf0ef;color:#c0392b;font-size:10px;font-weight:600;padding:3px 7px;border-radius:4px;margin-top:4px;border:1px solid #f5b7b1;';
+          badge.textContent = '⚠ Fecha vencida — NO OPERATIVO';
+          this.parentElement.appendChild(badge);
+        }
+        tr.dataset.fechaVencida = '1';
+      } else {
+        var badge = tr.querySelector('.fecha-vencida-badge');
+        if (badge) badge.remove();
+        tr.dataset.fechaVencida = '0';
+      }
     });
   });
 }
@@ -412,6 +445,7 @@ function calcRes() {
     var srv = cells[20].querySelector('select').value;
     var itemVals = [];
     var rowNCs = [];
+    var ncObs = [];
 
     for (var k = 0; k < 13; k++) {
       var btns = cells[5+k].querySelectorAll('.cb2');
@@ -419,11 +453,20 @@ function calcRes() {
       btns.forEach(function(b) { if (b.classList.contains('ac') || b.classList.contains('anc') || b.classList.contains('ana')) active = b; });
       var v = active ? getVal(active) : '';
       if (!v) allFilled = false;
-      if (v === 'NC') { ncTotal.push({ext: i+1, item: ITEMS[k]}); rowNCs.push(ITEMS[k]); }
+      // Leer obs de NC
+      var obsDiv = document.getElementById('ncObs-' + i + '-' + k);
+      var obsInput = obsDiv ? obsDiv.querySelector('input') : null;
+      var ncObsVal = (v === 'NC' && obsInput) ? obsInput.value.trim() : '';
+      if (v === 'NC') { ncTotal.push({ext: i+1, item: ITEMS[k], obs: ncObsVal}); rowNCs.push(ITEMS[k]); }
       itemVals.push(v);
+      ncObs.push(ncObsVal);
     }
-    var operativo = rowNCs.length === 0;
-    rowData.push({ubic:ubic, tipo:tipo, cap:cap, marca:marca, fecha:fecha, obs:obs, srv:srv, itemVals:itemVals, operativo:operativo, rowNCs:rowNCs});
+
+    // Verificar fecha vencida
+    var fechaVencida = tr.dataset.fechaVencida === '1';
+    var operativo = rowNCs.length === 0 && !fechaVencida;
+    if (fechaVencida && rowNCs.indexOf('FECHA VENCIDA') < 0) rowNCs.push('FECHA VENCIDA');
+    rowData.push({ubic:ubic, tipo:tipo, cap:cap, marca:marca, fecha:fecha, obs:obs, srv:srv, itemVals:itemVals, ncObs:ncObs, operativo:operativo, rowNCs:rowNCs, fechaVencida:fechaVencida});
   });
 
   if (!allFilled) { alert('Por favor completa todos los ítems C/NC/NA antes de continuar.'); return; }
@@ -446,7 +489,11 @@ function renderRes(ncs, rowData) {
       if (!r.operativo) {
         var obsText = r.obs ? ' — Obs: ' + r.obs : '';
         ncHtml += '<div style="margin-bottom:6px"><div style="font-weight:600;font-size:12px;color:#962d22">Extintor #' + (i+1) + ' · ' + r.ubic + ' — NO OPERATIVO' + obsText + '</div>';
-        r.rowNCs.forEach(function(nc) { ncHtml += '<div class="nc-item" style="margin-left:12px">✗ ' + nc + '</div>'; });
+        r.rowNCs.forEach(function(nc) {
+          var idxItem = ITEMS.indexOf(nc);
+          var ncObsTxt = (idxItem >= 0 && r.ncObs && r.ncObs[idxItem]) ? ' — ' + r.ncObs[idxItem] : '';
+          ncHtml += '<div class="nc-item" style="margin-left:12px">✗ ' + nc + ncObsTxt + '</div>';
+        });
         ncHtml += '</div>';
       }
     });
@@ -581,7 +628,7 @@ function guardarEnSheets(fecha, nInsp, area, rowData, fechaGuardado, esEdicion, 
     cargo: tActual ? tActual.cargo : '-',
     extintores: rowData.map(function(r) {
       return { ubic: r.ubic, tipo: r.tipo, cap: r.cap, marca: r.marca,
-        itemVals: r.itemVals, fecha: r.fecha, obs: r.obs, srv: r.srv,
+        itemVals: r.itemVals, ncObs: r.ncObs || [], fecha: r.fecha, obs: r.obs, srv: r.srv,
         operativo: r.operativo };
     })
   };
