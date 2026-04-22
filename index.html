@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Inspección Extintores – Planta Chimborazo</title>
+<title>Inspección Extintores – UCEM</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
 :root{--rojo:#C0392B;--rojo-d:#962d22;--rojo-l:#fdf0ef;--gris:#2c2c2c;--gm:#555;--gc:#f4f4f4;--bd:#ddd;--verde:#1a7a4a;--verde-l:#eaf7f0;--azul:#1a5276;}
@@ -75,36 +75,68 @@ table.ext td input,table.ext td select{padding:5px 7px;font-size:12px;border-rad
 <body>
 <div class="header">
   <div class="h-logo">UCEM</div>
-  <div class="h-title">Inspección de Extintores · Chimborazo</div>
+  <div class="h-title">Inspección de Extintores · <span id="hPlantaNombre">Seleccione planta</span></div>
   <div class="h-badge">FSI-013 v02</div>
   <button onclick="goRegistros()" style="margin-left:8px;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:#fff;padding:4px 10px;border-radius:4px;font-size:11px;cursor:pointer">📋 Registros</button>
 </div>
 <div class="wrap">
   <div class="planta-bar">
     <div class="pi">🏭</div>
-    <div><div class="pn">Planta Chimborazo</div><div class="ps">Unión Cementera Nacional UCEM S.A.</div></div>
+    <div><div class="pn" id="plantaBarNombre">Seleccione una planta</div><div class="ps">Unión Cementera Nacional UCEM S.A.</div></div>
   </div>
   <div class="steps">
-    <div class="step active" id="s1">1. Inspector</div>
+    <div class="step active" id="s0">0. Planta</div>
+    <div class="step" id="s1">1. Inspector</div>
     <div class="step" id="s2">2. Área</div>
     <div class="step" id="s3">3. Extintores</div>
     <div class="step" id="s4">4. Resultado</div>
   </div>
 
+  <!-- P0: Selección de planta -->
+  <div id="p0" class="card">
+    <div class="ch"><span class="n" style="background:var(--azul)">0</span> Seleccione la planta</div>
+    <div class="cb">
+      <div class="field">
+        <label>Planta UCEM</label>
+        <select id="plantaSelect">
+          <option value="">-- Seleccione planta --</option>
+          <option value="Planta Chimborazo">Planta Chimborazo</option>
+          <option value="Planta Guapán">Planta Guapán</option>
+          <option value="Planta Quito">Planta Quito</option>
+          <option value="Planta Guayaquil">Planta Guayaquil</option>
+          <option value="Planta Manta">Planta Manta</option>
+          <option value="Planta Cuenca">Planta Cuenca</option>
+          <option value="Planta Zulay">Planta Zulay</option>
+        </select>
+      </div>
+      <button class="btn btn-p" id="btnP1">Continuar →</button>
+    </div>
+  </div>
+
   <!-- P1 -->
-  <div id="p1" class="card">
+  <div id="p1" class="card hidden">
     <div class="ch"><span class="n">1</span> Datos del inspector</div>
     <div class="cb">
-      <div class="row2">
-        <div class="field"><label>Código trabajador</label><input type="text" id="codInput" placeholder="Ej: 23452"></div>
-        <div class="field"><label>Nº Inspección</label><input type="text" id="nInsp" placeholder="Ej: 01"></div>
+      <!-- Chimborazo: código de trabajador -->
+      <div id="p1Chimborazo">
+        <div class="row2">
+          <div class="field"><label>Código trabajador</label><input type="text" id="codInput" placeholder="Ej: 23452"></div>
+          <div class="field"><label>Nº Inspección</label><input type="text" id="nInsp" placeholder="Ej: 01"></div>
+        </div>
+        <div id="tCard" class="trab-card hidden">
+          <div class="trab-name" id="tNom"></div>
+          <div class="trab-det" id="tDet"></div>
+        </div>
+        <div id="tErr" class="hidden" style="color:var(--rojo);font-size:12px;margin-bottom:8px;">Código no encontrado</div>
       </div>
-      <div id="tCard" class="trab-card hidden">
-        <div class="trab-name" id="tNom"></div>
-        <div class="trab-det" id="tDet"></div>
+      <!-- Otras plantas: nombre + cargo libres -->
+      <div id="p1Generica" class="hidden">
+        <div class="field"><label>Nombre del inspector</label><input type="text" id="nombreLibre" placeholder="Ej: Juan Pérez"></div>
+        <div class="field"><label>Cargo</label><input type="text" id="cargoLibre" placeholder="Ej: Inspector de Seguridad"></div>
+        <div class="field"><label>Nº Inspección</label><input type="text" id="nInspGenerica" placeholder="Ej: 01"></div>
       </div>
-      <div id="tErr" class="hidden" style="color:var(--rojo);font-size:12px;margin-bottom:8px;">Código no encontrado</div>
       <button class="btn btn-p" id="btnP2">Continuar →</button>
+      <button class="btn btn-s" id="btnP0b">← Atrás</button>
     </div>
   </div>
 
@@ -112,15 +144,24 @@ table.ext td input,table.ext td select{padding:5px 7px;font-size:12px;border-rad
   <div id="p2" class="hidden card">
     <div class="ch"><span class="n">2</span> Selección de área</div>
     <div class="cb">
-      <div class="field"><label>Área a inspeccionar</label>
-        <select id="areaS"><option value="">-- Seleccione área --</option></select>
+      <!-- Chimborazo: selector de área con lista -->
+      <div id="p2Chimborazo">
+        <div class="field"><label>Área a inspeccionar</label>
+          <select id="areaS"><option value="">-- Seleccione área --</option></select>
+        </div>
+        <div style="text-align:right;margin-bottom:10px;margin-top:-6px;">
+          <button onclick="toggleGestionAreas()" style="background:none;border:none;color:var(--rojo);font-size:11px;font-weight:600;cursor:pointer;text-decoration:underline">⚙ Gestionar áreas/ubicaciones agregadas ★</button>
+        </div>
+        <div id="modalGestionAreas" style="display:none;background:#fff5f5;border:1.5px solid #f5b7b1;border-radius:8px;padding:12px;margin-bottom:10px;">
+          <div style="font-size:12px;font-weight:600;color:var(--rojo);margin-bottom:8px;">Áreas y ubicaciones personalizadas ★</div>
+          <div id="listaAreasCustom"></div>
+        </div>
       </div>
-      <div style="text-align:right;margin-bottom:10px;margin-top:-6px;">
-        <button onclick="toggleGestionAreas()" style="background:none;border:none;color:var(--rojo);font-size:11px;font-weight:600;cursor:pointer;text-decoration:underline">⚙ Gestionar áreas/ubicaciones agregadas ★</button>
-      </div>
-      <div id="modalGestionAreas" style="display:none;background:#fff5f5;border:1.5px solid #f5b7b1;border-radius:8px;padding:12px;margin-bottom:10px;">
-        <div style="font-size:12px;font-weight:600;color:var(--rojo);margin-bottom:8px;">Áreas y ubicaciones personalizadas ★</div>
-        <div id="listaAreasCustom"></div>
+      <!-- Otras plantas: campo libre de área -->
+      <div id="p2Generica" class="hidden">
+        <div class="field"><label>Área a inspeccionar</label>
+          <input type="text" id="areaLibre" placeholder="Ej: Bodega Principal, Taller, Oficinas...">
+        </div>
       </div>
       <div class="num-box">
         <label>¿Cuántos extintores hay?</label>
@@ -200,13 +241,15 @@ table.ext td input,table.ext td select{padding:5px 7px;font-size:12px;border-rad
 </div>
 
 <script>
-var APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyf-r3Hds24dIIIs34mEyJqHomosCE2OGFFqbPtQmVH6Gs7OFTaSQbNgdXiNTUlPgSLkA/exec';
+var APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwhy3GZuuzmk2b-RePMEPIg1nIye6KaPVrvnz2vuue0y2jzhwl12ZnGhflhBOcY_aW0xA/exec';
 var ITEMS = ['PINTURA','GOLPES','AUTOADHESIVO FECHA/MTTO','MANIJA TRANSPORTE','MANIJA DISPARO','PRESIÓN','MANÓMETRO','BOQUILLA','MANGUERA','RING/ARO SEGURIDAD','CORNETA','SEÑALIZACIÓN','SOPORTE/COLGAR/RUEDAS'];
 var TIPOS = ['PQS','CO2','Tipo K'];
 var CAPS = ['2.5','5','10','15','20','25','50','100','125','150'];
 var SERVICIOS = ['RECARGA','MANTENIMIENTO','PRUEBA HIDROSTÁTICA'];
 var tActual = null;
 var _editIndex = null;
+var plantaActual = ''; // planta seleccionada
+var esChimborazo = false;
 
 var TRABAJADORES = [
   {c:"23452",n:"JESSICA ELIZABETH CHAVEZ GRANIZO",cargo:"INSPECTOR SEGURIDAD INTEGRAL",p:"CHIMBORAZO"},
@@ -237,14 +280,16 @@ var DATA = {"TORRE DE CALCINACIÓN":[{"ubicacion":"MCC COMPRESORES","tipo":"CO2"
 window.onload = function() {
   cargarAreas();
   document.getElementById('codInput').addEventListener('input', function() { buscar(this.value); });
+  document.getElementById('btnP1').addEventListener('click', goP1);
   document.getElementById('btnP2').addEventListener('click', goP2);
   document.getElementById('btnP3').addEventListener('click', goP3);
+  document.getElementById('btnP0b').addEventListener('click', goP0);
   document.getElementById('btnP1b').addEventListener('click', goP1);
   document.getElementById('btnP2b').addEventListener('click', goP2);
   document.getElementById('btnCalc').addEventListener('click', calcRes);
   document.getElementById('btnGuardar').addEventListener('click', guardarRegistro);
   document.getElementById('btnNueva').addEventListener('click', resetApp);
-  document.getElementById('btnVolverReg').addEventListener('click', goP1);
+  document.getElementById('btnVolverReg').addEventListener('click', goP0);
 };
 
 function cargarAreas() {
@@ -289,15 +334,45 @@ function buscar(v) {
   }
 }
 
-function goP1() { show('p1'); setS(1); }
+function goP0() { show('p0'); setS(0); }
+
+function goP1() {
+  var sel = document.getElementById('plantaSelect').value;
+  if (!sel) { alert('Selecciona una planta para continuar.'); return; }
+  plantaActual = sel;
+  esChimborazo = (sel === 'Planta Chimborazo');
+  document.getElementById('hPlantaNombre').textContent = sel;
+  document.getElementById('plantaBarNombre').textContent = sel;
+  // Mostrar sección correcta en P1
+  document.getElementById('p1Chimborazo').classList.toggle('hidden', !esChimborazo);
+  document.getElementById('p1Generica').classList.toggle('hidden', esChimborazo);
+  // Mostrar sección correcta en P2
+  document.getElementById('p2Chimborazo').classList.toggle('hidden', !esChimborazo);
+  document.getElementById('p2Generica').classList.toggle('hidden', esChimborazo);
+  show('p1'); setS(1);
+}
+
 function goP2() {
-  if (!tActual) { alert('Ingresa un código de trabajador válido.'); return; }
+  if (esChimborazo) {
+    if (!tActual) { alert('Ingresa un código de trabajador válido.'); return; }
+  } else {
+    var nombre = document.getElementById('nombreLibre').value.trim();
+    var cargo = document.getElementById('cargoLibre').value.trim();
+    if (!nombre || !cargo) { alert('Ingresa nombre y cargo del inspector.'); return; }
+    tActual = { n: nombre, cargo: cargo, c: '', p: plantaActual };
+  }
   show('p2'); setS(2);
 }
 function goP3() {
-  var area = document.getElementById('areaS').value;
-  var n = parseInt(document.getElementById('numExt').value) || 1;
-  if (!area) { alert('Selecciona un área.'); return; }
+  var area, n;
+  n = parseInt(document.getElementById('numExt').value) || 1;
+  if (esChimborazo) {
+    area = document.getElementById('areaS').value;
+    if (!area) { alert('Selecciona un área.'); return; }
+  } else {
+    area = document.getElementById('areaLibre').value.trim();
+    if (!area) { alert('Escribe el área a inspeccionar.'); return; }
+  }
   buildTable(area, n);
   show('p3');
   setS(3);
@@ -314,10 +389,25 @@ function buildTable(area, n) {
   for (var i = 0; i < n; i++) {
     var pre = ubics[i] || {};
 
-    // ubicacion options
-    var ubOpts = '';
-    for (var j = 0; j < ubics.length; j++) {
-      ubOpts += '<option value="' + ubics[j].ubicacion + '"' + (j === i ? ' selected' : '') + '>' + ubics[j].ubicacion + '</option>';
+    // ubicacion: selector para Chimborazo, texto libre para otras plantas
+    var ubicacionCell = '';
+    if (esChimborazo && ubics.length > 0) {
+      var ubOpts = '';
+      for (var j = 0; j < ubics.length; j++) {
+        ubOpts += '<option value="' + ubics[j].ubicacion + '"' + (j === i ? ' selected' : '') + '>' + ubics[j].ubicacion + '</option>';
+      }
+      ubicacionCell =
+        '<div style="display:flex;gap:4px;align-items:center">' +
+          '<select style="min-width:180px" id="ubicSel-' + i + '">' + ubOpts + '</select>' +
+          '<button type="button" onclick="toggleNuevaUbicFila(' + i + ')" style="flex-shrink:0;width:26px;height:26px;border-radius:50%;border:1.5px solid var(--azul);background:#f0f7ff;color:var(--azul);font-size:16px;font-weight:700;cursor:pointer">+</button>' +
+        '</div>' +
+        '<div id="nuevaUbicFila-' + i + '" style="display:none;margin-top:6px;background:#eef5fd;border:1px solid #b3d4f5;border-radius:6px;padding:8px;">' +
+          '<div style="font-size:10px;color:var(--azul);font-weight:600;margin-bottom:5px;">NUEVA UBICACIÓN</div>' +
+          '<input type="text" id="nuevaUbicInput-' + i + '" placeholder="Escribe la ubicación..." style="margin-bottom:5px;font-size:12px;padding:5px 8px;">' +
+          '<button type="button" onclick="agregarUbicFila(' + i + ')" style="width:100%;padding:5px;background:var(--azul);color:#fff;border:none;border-radius:4px;font-size:12px;font-weight:600;cursor:pointer">Agregar</button>' +
+        '</div>';
+    } else {
+      ubicacionCell = '<input type="text" id="ubicSel-' + i + '" placeholder="Ej: Bodega, Oficina..." style="min-width:180px" value="' + (pre.ubicacion || '') + '">';
     }
 
     // tipo options
@@ -333,13 +423,16 @@ function buildTable(area, n) {
       capsOpts += '<option value="' + CAPS[c] + '"' + (CAPS[c] === capVal ? ' selected' : '') + '>' + CAPS[c] + ' Lbs</option>';
     }
 
+    // Para plantas genéricas, tipo y capacidad son texto/select igual pero marca libre
+    var tipoCell = '<select style="min-width:80px"><option value="">--</option>' + tipoOpts + '</select>';
+    var capCell = '<select style="min-width:80px">' + capsOpts + '</select>';
+
     // servicio options
     var srvOpts = '<option value="">--</option>';
     for (var s = 0; s < SERVICIOS.length; s++) {
       srvOpts += '<option value="' + SERVICIOS[s] + '">' + SERVICIOS[s] + '</option>';
     }
 
-    // cns items
     // cns items con observaciones por NC
     var cnsHTML = '';
     for (var k = 0; k < ITEMS.length; k++) {
@@ -355,19 +448,9 @@ function buildTable(area, n) {
     var tr = document.createElement('tr');
     tr.innerHTML =
       '<td style="text-align:center;font-weight:600;color:var(--gm)">' + (i+1) + '</td>' +
-      '<td>' +
-        '<div style="display:flex;gap:4px;align-items:center">' +
-          '<select style="min-width:180px" id="ubicSel-' + i + '">' + ubOpts + '</select>' +
-          '<button type="button" onclick="toggleNuevaUbicFila(' + i + ')" style="flex-shrink:0;width:26px;height:26px;border-radius:50%;border:1.5px solid var(--azul);background:#f0f7ff;color:var(--azul);font-size:16px;font-weight:700;cursor:pointer">+</button>' +
-        '</div>' +
-        '<div id="nuevaUbicFila-' + i + '" style="display:none;margin-top:6px;background:#eef5fd;border:1px solid #b3d4f5;border-radius:6px;padding:8px;">' +
-          '<div style="font-size:10px;color:var(--azul);font-weight:600;margin-bottom:5px;">NUEVA UBICACIÓN</div>' +
-          '<input type="text" id="nuevaUbicInput-' + i + '" placeholder="Escribe la ubicación..." style="margin-bottom:5px;font-size:12px;padding:5px 8px;">' +
-          '<button type="button" onclick="agregarUbicFila(' + i + ')" style="width:100%;padding:5px;background:var(--azul);color:#fff;border:none;border-radius:4px;font-size:12px;font-weight:600;cursor:pointer">Agregar</button>' +
-        '</div>' +
-      '</td>' +
-      '<td><select style="min-width:80px"><option value="">--</option>' + tipoOpts + '</select></td>' +
-      '<td><select style="min-width:80px">' + capsOpts + '</select></td>' +
+      '<td>' + ubicacionCell + '</td>' +
+      '<td>' + tipoCell + '</td>' +
+      '<td>' + capCell + '</td>' +
       '<td><input type="text" value="' + (pre.marca || '') + '" style="min-width:90px"></td>' +
       cnsHTML +
       '<td><input type="date" style="min-width:130px"></td>' +
@@ -387,14 +470,13 @@ function buildTable(area, n) {
       if (this === btns[0]) this.classList.add('ac');
       else if (this === btns[1]) this.classList.add('anc');
       else this.classList.add('ana');
-      // Mostrar/ocultar cuadro de obs NC
       var td = parent.parentElement;
       var obsDiv = td.querySelector('div[id^="ncObs"]');
       if (obsDiv) obsDiv.style.display = this.classList.contains('anc') ? 'block' : 'none';
     });
   });
 
-  // Detectar fecha vencida → marcar NO OPERATIVO automáticamente
+  // Detectar fecha vencida
   var fechaInputs = tbody.querySelectorAll('input[type="date"]');
   fechaInputs.forEach(function(inp) {
     inp.addEventListener('change', function() {
@@ -436,7 +518,7 @@ function calcRes() {
 
   rows.forEach(function(tr, i) {
     var cells = tr.querySelectorAll('td');
-    var ubic = cells[1].querySelector('select').value;
+    var ubic = cells[1].querySelector('select') ? cells[1].querySelector('select').value : cells[1].querySelector('input').value;
     var tipo = cells[2].querySelector('select').value;
     var cap = cells[3].querySelector('select').value;
     var marca = cells[4].querySelector('input').value;
@@ -476,8 +558,8 @@ function calcRes() {
 }
 
 function renderRes(ncs, rowData) {
-  var area = document.getElementById('areaS').value;
-  var nInsp = document.getElementById('nInsp').value;
+  var area = esChimborazo ? document.getElementById('areaS').value : document.getElementById('areaLibre').value;
+  var nInsp = esChimborazo ? document.getElementById('nInsp').value : document.getElementById('nInspGenerica').value;
   var fecha = new Date().toLocaleDateString('es-EC');
   var operativoGlobal = ncs.length === 0;
 
@@ -531,7 +613,7 @@ function renderRes(ncs, rowData) {
     '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px">' +
       '<div style="background:#f4f4f4;padding:6px 8px;border-radius:4px"><div style="font-size:9px;color:#666;text-transform:uppercase;font-weight:600">Fecha</div><div style="font-size:11px;font-weight:600">' + fecha + '</div></div>' +
       '<div style="background:#f4f4f4;padding:6px 8px;border-radius:4px"><div style="font-size:9px;color:#666;text-transform:uppercase;font-weight:600">Nº Inspección</div><div style="font-size:11px;font-weight:600">' + (nInsp||'-') + '</div></div>' +
-      '<div style="background:#f4f4f4;padding:6px 8px;border-radius:4px"><div style="font-size:9px;color:#666;text-transform:uppercase;font-weight:600">Planta</div><div style="font-size:11px;font-weight:600">CHIMBORAZO</div></div>' +
+      '<div style="background:#f4f4f4;padding:6px 8px;border-radius:4px"><div style="font-size:9px;color:#666;text-transform:uppercase;font-weight:600">Planta</div><div style="font-size:11px;font-weight:600">' + plantaActual + '</div></div>' +
       '<div style="background:#f4f4f4;padding:6px 8px;border-radius:4px"><div style="font-size:9px;color:#666;text-transform:uppercase;font-weight:600">Área</div><div style="font-size:11px;font-weight:600">' + area + '</div></div>' +
       '<div style="background:#f4f4f4;padding:6px 8px;border-radius:4px;grid-column:span 2"><div style="font-size:9px;color:#666;text-transform:uppercase;font-weight:600">Responsable</div><div style="font-size:11px;font-weight:600">' + (tActual?tActual.n:'-') + '</div></div>' +
       '<div style="background:#f4f4f4;padding:6px 8px;border-radius:4px;grid-column:span 2"><div style="font-size:9px;color:#666;text-transform:uppercase;font-weight:600">Cargo</div><div style="font-size:11px;font-weight:600">' + (tActual?tActual.cargo:'-') + '</div></div>' +
@@ -577,8 +659,10 @@ function guardarRegistro() {
   if (esEdicion) {
     // Edición — actualizar registro existente
     var fechaCreacion = REGISTROS[_editIndex].fechaCreacion || REGISTROS[_editIndex].fecha;
-    var reg = {
+    var planta = plantaActual || 'Planta Chimborazo';
+  var reg = {
       id: REGISTROS[_editIndex].id,
+      planta: planta,
       fecha: d.fecha,
       fechaCreacion: fechaCreacion,
       fechaActualizacion: fechaGuardado,
@@ -595,6 +679,7 @@ function guardarRegistro() {
     // Nuevo registro
     var reg = {
       id: Date.now(),
+      planta: plantaActual || 'Planta Chimborazo',
       fecha: d.fecha,
       fechaCreacion: fechaGuardado,
       fechaActualizacion: null,
@@ -622,7 +707,7 @@ function guardarEnSheets(fecha, nInsp, area, rowData, fechaGuardado, esEdicion, 
     fechaGuardado: fechaGuardado,
     nInsp: nInsp,
     area: area,
-    planta: 'Planta Chimborazo',
+    planta: plantaActual || 'Planta Chimborazo',
     accion: esEdicion ? 'editar' : 'nuevo',
     rowNum: rowNum || null,
     responsable: tActual ? tActual.n : '-',
@@ -659,7 +744,7 @@ function renderRegistros() {
       '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:6px">' +
         '<div>' +
           '<div style="font-weight:600;font-size:13px">' + r.area + '</div>' +
-          '<div style="font-size:11px;color:var(--gm);margin-top:2px">' + r.fecha + ' · Nº' + r.nInsp + ' · ' + r.responsable + '</div>' +
+          '<div style="font-size:11px;color:var(--gm);margin-top:2px">' + (r.planta||'Planta Chimborazo') + ' · ' + r.fecha + ' · Nº' + r.nInsp + ' · ' + r.responsable + '</div>' +
           '<div style="font-size:10px;color:var(--gm)">Guardado: ' + (r.fechaCreacion||r.fecha) + (r.fechaActualizacion ? ' · <span style="color:#1a5276">Actualizado: ' + r.fechaActualizacion + '</span>' : '') + '</div>' +
           '<div style="font-size:11px;color:var(--gm)">' + r.rowData.length + ' extintor(es)</div>' +
         '</div>' +
@@ -677,19 +762,40 @@ function renderRegistros() {
 function editarReg(i) {
   var REGISTROS = JSON.parse(localStorage.getItem('ucem_registros') || '[]');
   var r = REGISTROS[i];
-  var t = null;
-  for (var j = 0; j < TRABAJADORES.length; j++) {
-    if (TRABAJADORES[j].c === r.trabajadorCodigo) { t = TRABAJADORES[j]; break; }
+
+  // Restaurar planta
+  plantaActual = r.planta || 'Planta Chimborazo';
+  esChimborazo = (plantaActual === 'Planta Chimborazo');
+  document.getElementById('plantaSelect').value = plantaActual;
+  document.getElementById('hPlantaNombre').textContent = plantaActual;
+  document.getElementById('plantaBarNombre').textContent = plantaActual;
+  document.getElementById('p1Chimborazo').classList.toggle('hidden', !esChimborazo);
+  document.getElementById('p1Generica').classList.toggle('hidden', esChimborazo);
+  document.getElementById('p2Chimborazo').classList.toggle('hidden', !esChimborazo);
+  document.getElementById('p2Generica').classList.toggle('hidden', esChimborazo);
+
+  if (esChimborazo) {
+    var t = null;
+    for (var j = 0; j < TRABAJADORES.length; j++) {
+      if (TRABAJADORES[j].c === r.trabajadorCodigo) { t = TRABAJADORES[j]; break; }
+    }
+    if (t) {
+      tActual = t;
+      document.getElementById('codInput').value = t.c;
+      document.getElementById('tNom').textContent = t.n;
+      document.getElementById('tDet').textContent = t.cargo + ' · Planta ' + t.p;
+      document.getElementById('tCard').classList.remove('hidden');
+    }
+    document.getElementById('nInsp').value = r.nInsp;
+    document.getElementById('areaS').value = r.area;
+  } else {
+    tActual = { n: r.responsable, cargo: r.cargo, c: '', p: plantaActual };
+    document.getElementById('nombreLibre').value = r.responsable;
+    document.getElementById('cargoLibre').value = r.cargo;
+    document.getElementById('nInspGenerica').value = r.nInsp;
+    document.getElementById('areaLibre').value = r.area;
   }
-  if (t) {
-    tActual = t;
-    document.getElementById('codInput').value = t.c;
-    document.getElementById('tNom').textContent = t.n;
-    document.getElementById('tDet').textContent = t.cargo + ' · Planta ' + t.p;
-    document.getElementById('tCard').classList.remove('hidden');
-  }
-  document.getElementById('nInsp').value = r.nInsp;
-  document.getElementById('areaS').value = r.area;
+
   document.getElementById('numExt').value = r.rowData.length;
   _editIndex = i;
   buildTable(r.area, r.rowData.length);
@@ -699,7 +805,9 @@ function editarReg(i) {
       var rd = r.rowData[idx];
       if (!rd) return;
       var cells = tr.querySelectorAll('td');
-      var ubSel = cells[1].querySelector('select'); if (ubSel) ubSel.value = rd.ubic;
+      // ubicacion: input o select según planta
+      var ubEl = cells[1].querySelector('select') || cells[1].querySelector('input');
+      if (ubEl) ubEl.value = rd.ubic;
       var tipoSel = cells[2].querySelector('select'); if (tipoSel) tipoSel.value = rd.tipo;
       var capSel = cells[3].querySelector('select'); if (capSel) capSel.value = rd.cap.replace(' Lbs','').replace(' lb','').trim();
       var marcaInp = cells[4].querySelector('input'); if (marcaInp) marcaInp.value = rd.marca;
@@ -740,6 +848,8 @@ function confirmarDuplicar() {
   copia.area = areaNueva;
   copia.fechaCreacion = null;
   copia.fechaActualizacion = null;
+  // preservar planta del original
+  copia.planta = REGISTROS[i].planta || 'Planta Chimborazo';
   REGISTROS.unshift(copia);
   localStorage.setItem('ucem_registros', JSON.stringify(REGISTROS));
   document.getElementById('modalDuplicar').style.display = 'none';
@@ -859,28 +969,37 @@ function eliminarUbicCustom(area, idx) {
 }
 
 function show(id) {
-  ['p1','p2','p3','p4','pReg'].forEach(function(p) { document.getElementById(p).classList.add('hidden'); });
+  ['p0','p1','p2','p3','p4','pReg'].forEach(function(p) { document.getElementById(p).classList.add('hidden'); });
   document.getElementById(id).classList.remove('hidden');
 }
 
 function setS(n) {
-  for (var i = 1; i <= 4; i++) {
+  for (var i = 0; i <= 4; i++) {
     var el = document.getElementById('s' + i);
+    if (!el) continue;
     el.className = 'step' + (i < n ? ' done' : i === n ? ' active' : '');
   }
 }
 
 function resetApp() {
   tActual = null; _editIndex = null;
+  plantaActual = ''; esChimborazo = false;
+  document.getElementById('plantaSelect').value = '';
   document.getElementById('codInput').value = '';
   document.getElementById('nInsp').value = '';
+  document.getElementById('nombreLibre').value = '';
+  document.getElementById('cargoLibre').value = '';
+  document.getElementById('nInspGenerica').value = '';
+  document.getElementById('areaLibre').value = '';
+  document.getElementById('hPlantaNombre').textContent = 'Seleccione planta';
+  document.getElementById('plantaBarNombre').textContent = 'Seleccione una planta';
   document.getElementById('tCard').classList.add('hidden');
   document.getElementById('areaS').value = '';
   document.getElementById('numExt').value = '1';
   document.getElementById('extBody').innerHTML = '';
   document.getElementById('pdfWrap').style.display = 'none';
   document.getElementById('resBox').innerHTML = '';
-  goP1();
+  goP0();
 }
 </script>
 </body>
