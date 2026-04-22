@@ -200,7 +200,7 @@ table.ext td input,table.ext td select{padding:5px 7px;font-size:12px;border-rad
 </div>
 
 <script>
-var APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzFwRsC9DF6IlvsgJEtmr7uJtEdka_JV-mK9nfCsSOL1sNWqWFi5ZGPL0W28G0ZwS51BQ/exec';
+var APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwhy3GZuuzmk2b-RePMEPIg1nIye6KaPVrvnz2vuue0y2jzhwl12ZnGhflhBOcY_aW0xA/exec';
 var ITEMS = ['PINTURA','GOLPES','AUTOADHESIVO FECHA/MTTO','MANIJA TRANSPORTE','MANIJA DISPARO','PRESIÓN','MANÓMETRO','BOQUILLA','MANGUERA','RING/ARO SEGURIDAD','CORNETA','SEÑALIZACIÓN','SOPORTE/COLGAR/RUEDAS'];
 var TIPOS = ['PQS','CO2','Tipo K'];
 var CAPS = ['2.5','5','10','15','20','25','50','100','125','150'];
@@ -619,8 +619,9 @@ function guardarRegistro() {
 
 function guardarEnSheets(fecha, nInsp, area, rowData, fechaGuardado, esEdicion, rowNum) {
   var payload = {
-    fecha: fecha, nInsp: nInsp, area: area,
-    fechaGuardado: fechaGuardado || fecha,
+    fechaGuardado: fechaGuardado,
+    nInsp: nInsp,
+    area: area,
     planta: 'Planta Chimborazo',
     accion: esEdicion ? 'editar' : 'nuevo',
     rowNum: rowNum || null,
