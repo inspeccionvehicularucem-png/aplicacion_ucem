@@ -63,7 +63,13 @@ table.ext td input,table.ext td select{padding:5px 7px;font-size:12px;border-rad
 #pdfWrap{display:none;background:#fff;border:1px solid var(--bd);border-radius:8px;overflow:hidden;margin-bottom:12px;}
 .pdf-hdr{background:var(--gris);color:#fff;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;font-size:11px;}
 .pdf-body{padding:16px;font-size:11px;}
-@media print{
+.spinner{display:inline-block;width:18px;height:18px;border:3px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.offline-banner{background:#e67e22;color:#fff;text-align:center;padding:8px;font-size:12px;font-weight:600;display:none;}
+.sync-badge{display:inline-block;font-size:10px;padding:2px 7px;border-radius:10px;font-weight:600;margin-left:6px;}
+.sync-ok{background:#eaf7f0;color:#1a7a4a;border:1px solid #1a7a4a;}
+.sync-err{background:#fdf0ef;color:#c0392b;border:1px solid #c0392b;}
+.reg-loading{text-align:center;padding:30px;color:var(--gm);font-size:13px;}
   .header,.steps,.planta-bar,.card,.btn,.res-box{display:none!important;}
   #p4{display:block!important;}
   #pdfWrap{display:block!important;border:none!important;}
@@ -73,6 +79,7 @@ table.ext td input,table.ext td select{padding:5px 7px;font-size:12px;border-rad
 </style>
 </head>
 <body>
+<div class="offline-banner" id="offlineBanner">⚠ Sin conexión a internet — los registros no están disponibles</div>
 <div class="header">
   <div class="h-logo">UCEM</div>
   <div class="h-title">Inspección de Extintores · <span id="hPlantaNombre">Seleccione planta</span></div>
@@ -290,6 +297,14 @@ window.onload = function() {
   document.getElementById('btnGuardar').addEventListener('click', guardarRegistro);
   document.getElementById('btnNueva').addEventListener('click', resetApp);
   document.getElementById('btnVolverReg').addEventListener('click', goP0);
+
+  // Monitor de conexión
+  function checkOnline() {
+    document.getElementById('offlineBanner').style.display = navigator.onLine ? 'none' : 'block';
+  }
+  window.addEventListener('online', checkOnline);
+  window.addEventListener('offline', checkOnline);
+  checkOnline();
 };
 
 function cargarAreas() {
@@ -643,110 +658,100 @@ function renderRes(ncs, rowData) {
 function guardarRegistro() {
   var d = window._lastResult;
   if (!d) { alert('Primero genera un resultado.'); return; }
+  if (!navigator.onLine) { alert('Sin conexión a internet. Por favor conéctate e intenta de nuevo.'); return; }
 
   var btn = document.getElementById('btnGuardar');
   btn.disabled = true;
-  btn.textContent = '⏳ Guardando...';
+  btn.innerHTML = '<span class="spinner"></span>Guardando...';
 
   var ahora = new Date();
   var fechaGuardado = ahora.toLocaleDateString('es-EC') + ' ' + ahora.toLocaleTimeString('es-EC', {hour:'2-digit',minute:'2-digit'});
-
-  var REGISTROS = JSON.parse(localStorage.getItem('ucem_registros') || '[]');
-
   var esEdicion = (_editIndex !== null && _editIndex !== undefined);
-  var rowNum = esEdicion && REGISTROS[_editIndex] ? (REGISTROS[_editIndex].sheetRow || null) : null;
+  var registroId = (esEdicion && window._editId) ? window._editId : String(Date.now());
 
-  if (esEdicion) {
-    // Edición — actualizar registro existente
-    var fechaCreacion = REGISTROS[_editIndex].fechaCreacion || REGISTROS[_editIndex].fecha;
-    var planta = plantaActual || 'Planta Chimborazo';
-  var reg = {
-      id: REGISTROS[_editIndex].id,
-      planta: planta,
-      fecha: d.fecha,
-      fechaCreacion: fechaCreacion,
-      fechaActualizacion: fechaGuardado,
-      nInsp: d.nInsp||'-', area: d.area,
-      responsable: tActual ? tActual.n : '-',
-      cargo: tActual ? tActual.cargo : '-',
-      operativoGlobal: d.operativoGlobal,
-      rowData: d.rowData,
-      trabajadorCodigo: tActual ? tActual.c : ''
-    };
-    REGISTROS[_editIndex] = reg;
-    _editIndex = null;
-  } else {
-    // Nuevo registro
-    var reg = {
-      id: Date.now(),
-      planta: plantaActual || 'Planta Chimborazo',
-      fecha: d.fecha,
-      fechaCreacion: fechaGuardado,
-      fechaActualizacion: null,
-      nInsp: d.nInsp||'-', area: d.area,
-      responsable: tActual ? tActual.n : '-',
-      cargo: tActual ? tActual.cargo : '-',
-      operativoGlobal: d.operativoGlobal,
-      rowData: d.rowData,
-      trabajadorCodigo: tActual ? tActual.c : ''
-    };
-    REGISTROS.unshift(reg);
-  }
-  localStorage.setItem('ucem_registros', JSON.stringify(REGISTROS));
-
-  // Guardar en Sheets
-  guardarEnSheets(d.fecha, d.nInsp, d.area, d.rowData, fechaGuardado, esEdicion, rowNum);
-
-  btn.textContent = '✓ Guardado — ' + fechaGuardado;
-  btn.style.background = '#0f6e56';
-  window._lastResult = null;
-}
-
-function guardarEnSheets(fecha, nInsp, area, rowData, fechaGuardado, esEdicion, rowNum) {
   var payload = {
+    id: registroId,
     fechaGuardado: fechaGuardado,
-    nInsp: nInsp,
-    area: area,
+    nInsp: d.nInsp || '-',
+    area: d.area,
     planta: plantaActual || 'Planta Chimborazo',
     accion: esEdicion ? 'editar' : 'nuevo',
-    rowNum: rowNum || null,
     responsable: tActual ? tActual.n : '-',
     cargo: tActual ? tActual.cargo : '-',
-    extintores: rowData.map(function(r) {
-      return { ubic: r.ubic, tipo: r.tipo, cap: r.cap, marca: r.marca,
-        itemVals: r.itemVals, ncObs: r.ncObs || [], fecha: r.fecha, obs: r.obs, srv: r.srv,
-        operativo: r.operativo };
+    extintores: d.rowData.map(function(r) {
+      return { ubic:r.ubic, tipo:r.tipo, cap:r.cap, marca:r.marca,
+        itemVals:r.itemVals, ncObs:r.ncObs||[], fecha:r.fecha, obs:r.obs, srv:r.srv,
+        operativo:r.operativo };
     })
   };
-  fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) })
-    .then(function(res) { return res.json(); })
-    .then(function(data) {
-      if (data.status === 'ok') console.log('✓ Guardado en Sheets');
-      else console.error('Error Sheets:', data.msg);
+
+  fetch(APPS_SCRIPT_URL, { method:'POST', body:JSON.stringify(payload) })
+    .then(function(res){ return res.json(); })
+    .then(function(resp) {
+      if (resp.status === 'ok') {
+        btn.innerHTML = '✓ Guardado correctamente';
+        btn.style.background = '#0f6e56';
+        _editIndex = null; window._editId = null; window._lastResult = null;
+      } else {
+        btn.disabled = false;
+        btn.innerHTML = '💾 Guardar registro';
+        btn.style.background = '#1a7a4a';
+        alert('Error al guardar: ' + (resp.msg || 'desconocido'));
+      }
     })
-    .catch(function(err) { console.error('Error conexión:', err); });
+    .catch(function() {
+      btn.disabled = false;
+      btn.innerHTML = '💾 Guardar registro';
+      btn.style.background = '#1a7a4a';
+      alert('Error de conexión. Verifica tu internet e intenta de nuevo.');
+    });
 }
 
-function goRegistros() { renderRegistros(); show('pReg'); }
+function goRegistros() {
+  show('pReg');
+  cargarRegistrosDesdeSheets();
+}
 
-function renderRegistros() {
-  var REGISTROS = JSON.parse(localStorage.getItem('ucem_registros') || '[]');
+function cargarRegistrosDesdeSheets() {
   var div = document.getElementById('regBody');
-  if (REGISTROS.length === 0) {
+  div.innerHTML = '<div class="reg-loading"><span class="spinner" style="border-top-color:var(--rojo)"></span> Cargando registros desde la nube...</div>';
+
+  if (!navigator.onLine) {
+    div.innerHTML = '<div style="text-align:center;padding:20px;color:#c0392b;font-size:13px;">⚠ Sin conexión a internet.<br>Los registros se guardan en Google Sheets y requieren conexión.</div>';
+    return;
+  }
+
+  fetch(APPS_SCRIPT_URL + '?accion=leer')
+    .then(function(res){ return res.json(); })
+    .then(function(resp) {
+      if (resp.status === 'ok') {
+        window._registrosSheets = resp.registros || [];
+        renderRegistros(window._registrosSheets);
+      } else {
+        div.innerHTML = '<div style="text-align:center;padding:20px;color:#c0392b;font-size:13px;">Error al cargar registros: ' + (resp.msg||'desconocido') + '</div>';
+      }
+    })
+    .catch(function() {
+      div.innerHTML = '<div style="text-align:center;padding:20px;color:#c0392b;font-size:13px;">⚠ No se pudo conectar con el servidor.<br>Verifica tu conexión a internet.</div>';
+    });
+}
+
+function renderRegistros(REGISTROS) {
+  var div = document.getElementById('regBody');
+  if (!REGISTROS || REGISTROS.length === 0) {
     div.innerHTML = '<div style="text-align:center;color:var(--gm);padding:20px;font-size:13px;">No hay inspecciones registradas aún.</div>';
     return;
   }
   div.innerHTML = REGISTROS.map(function(r, i) {
     var color = r.operativoGlobal ? '#1a7a4a' : '#C0392B';
-    var bg = r.operativoGlobal ? '#eaf7f0' : '#fdf0ef';
-    var txt = r.operativoGlobal ? 'OPERATIVO' : 'NO OPERATIVO';
+    var bg    = r.operativoGlobal ? '#eaf7f0' : '#fdf0ef';
+    var txt   = r.operativoGlobal ? 'OPERATIVO' : 'NO OPERATIVO';
     return '<div style="border:1px solid var(--bd);border-radius:6px;padding:12px;margin-bottom:8px;background:#fff">' +
       '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:6px">' +
         '<div>' +
           '<div style="font-weight:600;font-size:13px">' + r.area + '</div>' +
           '<div style="font-size:11px;color:var(--gm);margin-top:2px">' + (r.planta||'Planta Chimborazo') + ' · ' + r.fecha + ' · Nº' + r.nInsp + ' · ' + r.responsable + '</div>' +
-          '<div style="font-size:10px;color:var(--gm)">Guardado: ' + (r.fechaCreacion||r.fecha) + (r.fechaActualizacion ? ' · <span style="color:#1a5276">Actualizado: ' + r.fechaActualizacion + '</span>' : '') + '</div>' +
-          '<div style="font-size:11px;color:var(--gm)">' + r.rowData.length + ' extintor(es)</div>' +
+          '<div style="font-size:11px;color:var(--gm)">' + (r.rowData ? r.rowData.length : '?') + ' extintor(es)</div>' +
         '</div>' +
         '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">' +
           '<span style="background:' + bg + ';color:' + color + ';font-weight:700;font-size:11px;padding:3px 10px;border-radius:4px;border:1px solid ' + color + '">' + txt + '</span>' +
@@ -760,8 +765,13 @@ function renderRegistros() {
 }
 
 function editarReg(i) {
-  var REGISTROS = JSON.parse(localStorage.getItem('ucem_registros') || '[]');
+  var REGISTROS = window._registrosSheets || [];
   var r = REGISTROS[i];
+  if (!r) { alert('No se encontró el registro.'); return; }
+
+  // Guardar ID para la edición
+  window._editId = r.id;
+  _editIndex = i;
 
   // Restaurar planta
   plantaActual = r.planta || 'Planta Chimborazo';
@@ -777,7 +787,7 @@ function editarReg(i) {
   if (esChimborazo) {
     var t = null;
     for (var j = 0; j < TRABAJADORES.length; j++) {
-      if (TRABAJADORES[j].c === r.trabajadorCodigo) { t = TRABAJADORES[j]; break; }
+      if (TRABAJADORES[j].n === r.responsable) { t = TRABAJADORES[j]; break; }
     }
     if (t) {
       tActual = t;
@@ -785,6 +795,8 @@ function editarReg(i) {
       document.getElementById('tNom').textContent = t.n;
       document.getElementById('tDet').textContent = t.cargo + ' · Planta ' + t.p;
       document.getElementById('tCard').classList.remove('hidden');
+    } else {
+      tActual = { n: r.responsable, cargo: r.cargo, c: '', p: plantaActual };
     }
     document.getElementById('nInsp').value = r.nInsp;
     document.getElementById('areaS').value = r.area;
@@ -797,7 +809,6 @@ function editarReg(i) {
   }
 
   document.getElementById('numExt').value = r.rowData.length;
-  _editIndex = i;
   buildTable(r.area, r.rowData.length);
   setTimeout(function() {
     var rows = document.querySelectorAll('#extBody tr');
@@ -805,11 +816,10 @@ function editarReg(i) {
       var rd = r.rowData[idx];
       if (!rd) return;
       var cells = tr.querySelectorAll('td');
-      // ubicacion: input o select según planta
       var ubEl = cells[1].querySelector('select') || cells[1].querySelector('input');
       if (ubEl) ubEl.value = rd.ubic;
       var tipoSel = cells[2].querySelector('select'); if (tipoSel) tipoSel.value = rd.tipo;
-      var capSel = cells[3].querySelector('select'); if (capSel) capSel.value = rd.cap.replace(' Lbs','').replace(' lb','').trim();
+      var capSel = cells[3].querySelector('select'); if (capSel) capSel.value = String(rd.cap).replace(' Lbs','').replace(' lb','').trim();
       var marcaInp = cells[4].querySelector('input'); if (marcaInp) marcaInp.value = rd.marca;
       rd.itemVals.forEach(function(v, k) {
         var btns = cells[5+k].querySelectorAll('.cb2');
@@ -828,7 +838,7 @@ function editarReg(i) {
 
 function duplicarReg(i) {
   window._dupIndex = i;
-  var REGISTROS = JSON.parse(localStorage.getItem('ucem_registros') || '[]');
+  var REGISTROS = window._registrosSheets || [];
   var r = REGISTROS[i];
   document.getElementById('dupNInsp').value = r.nInsp + ' (copia)';
   document.getElementById('dupArea').value = r.area;
@@ -840,28 +850,69 @@ function confirmarDuplicar() {
   var nInspNuevo = document.getElementById('dupNInsp').value.trim();
   var areaNueva = document.getElementById('dupArea').value;
   if (!nInspNuevo || !areaNueva) { alert('Por favor completa el Nº inspección y el área.'); return; }
-  var REGISTROS = JSON.parse(localStorage.getItem('ucem_registros') || '[]');
-  var copia = JSON.parse(JSON.stringify(REGISTROS[i]));
-  copia.id = Date.now();
-  copia.fecha = new Date().toLocaleDateString('es-EC');
-  copia.nInsp = nInspNuevo;
-  copia.area = areaNueva;
-  copia.fechaCreacion = null;
-  copia.fechaActualizacion = null;
-  // preservar planta del original
-  copia.planta = REGISTROS[i].planta || 'Planta Chimborazo';
-  REGISTROS.unshift(copia);
-  localStorage.setItem('ucem_registros', JSON.stringify(REGISTROS));
+  if (!navigator.onLine) { alert('Sin conexión a internet.'); return; }
+
+  var REGISTROS = window._registrosSheets || [];
+  var original = REGISTROS[i];
+  var div = document.getElementById('regBody');
+
   document.getElementById('modalDuplicar').style.display = 'none';
-  renderRegistros();
+  div.innerHTML = '<div class="reg-loading"><span class="spinner" style="border-top-color:var(--rojo)"></span> Duplicando...</div>';
+
+  var ahora = new Date();
+  var fechaGuardado = ahora.toLocaleDateString('es-EC') + ' ' + ahora.toLocaleTimeString('es-EC', {hour:'2-digit',minute:'2-digit'});
+  var payload = {
+    id: String(Date.now()),
+    fechaGuardado: fechaGuardado,
+    nInsp: nInspNuevo,
+    area: areaNueva,
+    planta: original.planta || 'Planta Chimborazo',
+    accion: 'nuevo',
+    responsable: original.responsable,
+    cargo: original.cargo,
+    extintores: (original.rowData || []).map(function(r) {
+      return { ubic:r.ubic, tipo:r.tipo, cap:r.cap, marca:r.marca,
+        itemVals:r.itemVals, ncObs:r.ncObs||[], fecha:r.fecha, obs:r.obs, srv:r.srv,
+        operativo:r.operativo };
+    })
+  };
+
+  fetch(APPS_SCRIPT_URL, { method:'POST', body:JSON.stringify(payload) })
+    .then(function(res){ return res.json(); })
+    .then(function(resp) {
+      if (resp.status === 'ok') cargarRegistrosDesdeSheets();
+      else div.innerHTML = '<div style="color:#c0392b;padding:12px">Error al duplicar: ' + (resp.msg||'') + '</div>';
+    })
+    .catch(function() {
+      div.innerHTML = '<div style="color:#c0392b;padding:12px">Error de conexión al duplicar.</div>';
+    });
 }
 
 function eliminarReg(i) {
-  if (!confirm('¿Eliminar este registro?')) return;
-  var REGISTROS = JSON.parse(localStorage.getItem('ucem_registros') || '[]');
-  REGISTROS.splice(i, 1);
-  localStorage.setItem('ucem_registros', JSON.stringify(REGISTROS));
-  renderRegistros();
+  if (!confirm('¿Eliminar este registro? Se borrará del Sheet también.')) return;
+  if (!navigator.onLine) { alert('Sin conexión a internet.'); return; }
+
+  var REGISTROS = window._registrosSheets || [];
+  var r = REGISTROS[i];
+  var div = document.getElementById('regBody');
+  div.innerHTML = '<div class="reg-loading"><span class="spinner" style="border-top-color:var(--rojo)"></span> Eliminando...</div>';
+
+  var payload = {
+    accion: 'eliminar',
+    id: r.id,
+    sheetName: r.sheetName,
+    sheetRows: r._sheetRows || []
+  };
+
+  fetch(APPS_SCRIPT_URL, { method:'POST', body:JSON.stringify(payload) })
+    .then(function(res){ return res.json(); })
+    .then(function(resp) {
+      if (resp.status === 'ok') cargarRegistrosDesdeSheets();
+      else div.innerHTML = '<div style="color:#c0392b;padding:12px">Error al eliminar: ' + (resp.msg||'') + '</div>';
+    })
+    .catch(function() {
+      div.innerHTML = '<div style="color:#c0392b;padding:12px">Error de conexión al eliminar.</div>';
+    });
 }
 
 function toggleNuevaUbicFila(i) {
@@ -984,6 +1035,7 @@ function setS(n) {
 function resetApp() {
   tActual = null; _editIndex = null;
   plantaActual = ''; esChimborazo = false;
+  window._editId = null; window._registrosSheets = [];
   document.getElementById('plantaSelect').value = '';
   document.getElementById('codInput').value = '';
   document.getElementById('nInsp').value = '';
