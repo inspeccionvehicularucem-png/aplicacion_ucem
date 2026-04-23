@@ -63,14 +63,7 @@ table.ext td input,table.ext td select{padding:5px 7px;font-size:12px;border-rad
 #pdfWrap{display:none;background:#fff;border:1px solid var(--bd);border-radius:8px;overflow:hidden;margin-bottom:12px;}
 .pdf-hdr{background:var(--gris);color:#fff;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;font-size:11px;}
 .pdf-body{padding:16px;font-size:11px;}
-.spinner{display:inline-block;width:18px;height:18px;border:3px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px;}
-@keyframes spin{to{transform:rotate(360deg)}}
-.offline-banner{background:#e67e22;color:#fff;text-align:center;padding:8px;font-size:12px;font-weight:600;display:none;}
-.sync-badge{display:inline-block;font-size:10px;padding:2px 7px;border-radius:10px;font-weight:600;margin-left:6px;}
-.sync-ok{background:#eaf7f0;color:#1a7a4a;border:1px solid #1a7a4a;}
-.sync-err{background:#fdf0ef;color:#c0392b;border:1px solid #c0392b;}
-.reg-loading{text-align:center;padding:30px;color:var(--gm);font-size:13px;}
-@media print {
+@media print{
   .header,.steps,.planta-bar,.card,.btn,.res-box{display:none!important;}
   #p4{display:block!important;}
   #pdfWrap{display:block!important;border:none!important;}
@@ -80,7 +73,6 @@ table.ext td input,table.ext td select{padding:5px 7px;font-size:12px;border-rad
 </style>
 </head>
 <body>
-<div class="offline-banner" id="offlineBanner">⚠ Sin conexión a internet — los registros no están disponibles</div>
 <div class="header">
   <div class="h-logo">UCEM</div>
   <div class="h-title">Inspección de Extintores · <span id="hPlantaNombre">Seleccione planta</span></div>
@@ -100,8 +92,8 @@ table.ext td input,table.ext td select{padding:5px 7px;font-size:12px;border-rad
     <div class="step" id="s4">4. Resultado</div>
   </div>
 
-  <!-- P0: Selección de planta - CAMBIO: style forzado para evitar pantalla blanca -->
-  <div id="p0" class="card" style="display: block !important;">
+  <!-- P0: Selección de planta -->
+  <div id="p0" class="card">
     <div class="ch"><span class="n" style="background:var(--azul)">0</span> Seleccione la planta</div>
     <div class="cb">
       <div class="field">
@@ -125,6 +117,7 @@ table.ext td input,table.ext td select{padding:5px 7px;font-size:12px;border-rad
   <div id="p1" class="card hidden">
     <div class="ch"><span class="n">1</span> Datos del inspector</div>
     <div class="cb">
+      <!-- Chimborazo: código de trabajador -->
       <div id="p1Chimborazo">
         <div class="row2">
           <div class="field"><label>Código trabajador</label><input type="text" id="codInput" placeholder="Ej: 23452"></div>
@@ -136,6 +129,7 @@ table.ext td input,table.ext td select{padding:5px 7px;font-size:12px;border-rad
         </div>
         <div id="tErr" class="hidden" style="color:var(--rojo);font-size:12px;margin-bottom:8px;">Código no encontrado</div>
       </div>
+      <!-- Otras plantas: nombre + cargo libres -->
       <div id="p1Generica" class="hidden">
         <div class="field"><label>Nombre del inspector</label><input type="text" id="nombreLibre" placeholder="Ej: Juan Pérez"></div>
         <div class="field"><label>Cargo</label><input type="text" id="cargoLibre" placeholder="Ej: Inspector de Seguridad"></div>
@@ -150,20 +144,23 @@ table.ext td input,table.ext td select{padding:5px 7px;font-size:12px;border-rad
   <div id="p2" class="hidden card">
     <div class="ch"><span class="n">2</span> Selección de área</div>
     <div class="cb">
+      <!-- Chimborazo: selector de área con lista -->
       <div id="p2Chimborazo">
         <div class="field"><label>Área a inspeccionar</label>
           <select id="areaS"><option value="">-- Seleccione área --</option></select>
         </div>
         <div style="text-align:right;margin-bottom:10px;margin-top:-6px;">
-          <button onclick="toggleGestionAreas()" style="background:none;border:none;color:var(--rojo);font-size:11px;font-weight:600;cursor:pointer;text-decoration:underline">⚙ Gestionar áreas ★</button>
+          <button onclick="toggleGestionAreas()" style="background:none;border:none;color:var(--rojo);font-size:11px;font-weight:600;cursor:pointer;text-decoration:underline">⚙ Gestionar áreas/ubicaciones agregadas ★</button>
         </div>
         <div id="modalGestionAreas" style="display:none;background:#fff5f5;border:1.5px solid #f5b7b1;border-radius:8px;padding:12px;margin-bottom:10px;">
+          <div style="font-size:12px;font-weight:600;color:var(--rojo);margin-bottom:8px;">Áreas y ubicaciones personalizadas ★</div>
           <div id="listaAreasCustom"></div>
         </div>
       </div>
+      <!-- Otras plantas: campo libre de área -->
       <div id="p2Generica" class="hidden">
         <div class="field"><label>Área a inspeccionar</label>
-          <input type="text" id="areaLibre" placeholder="Ej: Bodega Principal...">
+          <input type="text" id="areaLibre" placeholder="Ej: Bodega Principal, Taller, Oficinas...">
         </div>
       </div>
       <div class="num-box">
@@ -185,9 +182,12 @@ table.ext td input,table.ext td select{padding:5px 7px;font-size:12px;border-rad
             <thead>
               <tr>
                 <th>#</th><th>UBICACIÓN</th><th>TIPO</th><th>CAPACIDAD (LB)</th><th>MARCA</th>
-                <th>PINTURA</th><th>GOLPES</th><th>FECHA/MTTO</th><th>MANIJA T</th><th>MANIJA D</th><th>PRESIÓN</th>
-                <th>MANÓMETRO</th><th>BOQUILLA</th><th>MANGUERA</th><th>SEGURIDAD</th><th>CORNETA</th><th>SEÑALIZACIÓN</th><th>SOPORTE</th>
-                <th>PRÓX. RECARGA</th><th>OBSERVACIONES</th><th>TIPO SERVICIO</th>
+                <th>PINTURA</th><th>GOLPES</th><th>AUTOADHESIVO FECHA/MTTO</th>
+                <th>MANIJA TRANSPORTE</th><th>MANIJA DISPARO</th><th>PRESIÓN</th>
+                <th>MANÓMETRO</th><th>BOQUILLA</th><th>MANGUERA</th>
+                <th>RING/ARO SEGURIDAD</th><th>CORNETA</th><th>SEÑALIZACIÓN</th>
+                <th>SOPORTE/COLGAR/RUEDAS</th><th>FECHA PRÓX. RECARGA</th>
+                <th>OBSERVACIONES</th><th>TIPO SERVICIO PRÓX. AÑO</th>
               </tr>
             </thead>
             <tbody id="extBody"></tbody>
@@ -195,6 +195,11 @@ table.ext td input,table.ext td select{padding:5px 7px;font-size:12px;border-rad
         </div>
         <button class="btn btn-p" id="btnCalc">Ver resultado →</button>
         <button class="btn btn-s" id="btnP2b">← Atrás</button>
+        <button onclick="toggleGestionarUbics()" style="width:100%;padding:9px;border:1.5px dashed #b3d4f5;border-radius:6px;background:#f0f7ff;color:var(--azul);font-size:12px;font-weight:600;cursor:pointer;margin-top:4px">⚙ Gestionar ubicaciones agregadas ★</button>
+        <div id="gestionUbics" style="display:none;background:#eef5fd;border:1px solid #b3d4f5;border-radius:6px;padding:12px;margin-top:6px;">
+          <div style="font-size:11px;font-weight:600;color:var(--azul);margin-bottom:8px;">Ubicaciones personalizadas ★</div>
+          <div id="listaUbicsCustom"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -203,35 +208,76 @@ table.ext td input,table.ext td select{padding:5px 7px;font-size:12px;border-rad
   <div id="p4" class="hidden">
     <div id="resBox"></div>
     <div id="pdfWrap">
-      <div class="pdf-hdr"><span>📄 Informe de Inspección</span></div>
+      <div class="pdf-hdr"><span>📄 Informe de Inspección</span><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;">FSI-013 | Rev.02 | 27-10-2025</span></div>
       <div class="pdf-body" id="pdfBody"></div>
     </div>
     <button class="btn btn-pdf" onclick="window.print()">⬇ Descargar / Imprimir PDF</button>
-    <button class="btn btn-p" id="btnGuardar">💾 Guardar registro</button>
+    <button class="btn btn-p" id="btnGuardar" style="background:#1a7a4a">💾 Guardar registro</button>
     <button class="btn btn-s" id="btnNueva">+ Nueva inspección</button>
+    <button onclick="goRegistros()" style="width:100%;padding:9px;border:1.5px solid #b3d4f5;border-radius:6px;background:#f0f7ff;color:var(--azul);font-size:12px;font-weight:600;cursor:pointer;margin-top:4px">📋 Ver registros</button>
+  </div>
+
+  <!-- MODAL DUPLICAR -->
+  <div id="modalDuplicar" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:999;align-items:center;justify-content:center;">
+    <div style="background:#fff;border-radius:10px;padding:20px;width:90%;max-width:400px;margin:auto;margin-top:20%">
+      <div style="font-size:14px;font-weight:600;margin-bottom:14px;color:var(--gris)">Duplicar inspección</div>
+      <div class="field"><label>Nº Inspección</label><input type="text" id="dupNInsp" placeholder="Ej: 02"></div>
+      <div class="field"><label>Área</label><select id="dupArea"><option value="">-- Seleccione área --</option></select></div>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button onclick="confirmarDuplicar()" style="flex:1;padding:10px;background:var(--azul);color:#fff;border:none;border-radius:6px;font-weight:600;font-size:13px;cursor:pointer">Duplicar</button>
+        <button onclick="document.getElementById('modalDuplicar').style.display='none'" style="flex:1;padding:10px;background:var(--gc);color:var(--gris);border:1px solid var(--bd);border-radius:6px;font-weight:600;font-size:13px;cursor:pointer">Cancelar</button>
+      </div>
+    </div>
   </div>
 
   <!-- REGISTROS -->
   <div id="pReg" class="hidden">
-    <div class="card"><div class="ch">Registro de inspecciones</div><div class="cb" id="regBody"></div></div>
+    <div class="card">
+      <div class="ch"><span class="n" style="background:var(--azul)">R</span> Registro de inspecciones</div>
+      <div class="cb" id="regBody" style="padding:10px;"></div>
+    </div>
     <button class="btn btn-s" id="btnVolverReg">← Volver</button>
   </div>
 </div>
 
 <script>
-// --- CONFIG ---
 var APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwhy3GZuuzmk2b-RePMEPIg1nIye6KaPVrvnz2vuue0y2jzhwl12ZnGhflhBOcY_aW0xA/exec';
 var ITEMS = ['PINTURA','GOLPES','AUTOADHESIVO FECHA/MTTO','MANIJA TRANSPORTE','MANIJA DISPARO','PRESIÓN','MANÓMETRO','BOQUILLA','MANGUERA','RING/ARO SEGURIDAD','CORNETA','SEÑALIZACIÓN','SOPORTE/COLGAR/RUEDAS'];
 var TIPOS = ['PQS','CO2','Tipo K'];
 var CAPS = ['2.5','5','10','15','20','25','50','100','125','150'];
 var SERVICIOS = ['RECARGA','MANTENIMIENTO','PRUEBA HIDROSTÁTICA'];
-var TRABAJADORES = [{c:"23452",n:"JESSICA ELIZABETH CHAVEZ GRANIZO",cargo:"INSPECTOR",p:"CHIMBORAZO"},{c:"157686",n:"DAVID MARCELO NAULA APUGLLON",cargo:"INSPECTOR",p:"CHIMBORAZO"}];
-var DATA = {"OFICINAS":[{"ubicacion":"SALA DE REUNIONES","tipo":"CO2","capacidad":"10","marca":"BUCKEYE"}]};
-var tActual = null; var plantaActual = ''; var esChimborazo = false; var _editIndex = null;
+var tActual = null;
+var _editIndex = null;
+var plantaActual = ''; // planta seleccionada
+var esChimborazo = false;
 
+var TRABAJADORES = [
+  {c:"23452",n:"JESSICA ELIZABETH CHAVEZ GRANIZO",cargo:"INSPECTOR SEGURIDAD INTEGRAL",p:"CHIMBORAZO"},
+  {c:"157686",n:"DAVID MARCELO NAULA APUGLLON",cargo:"INSPECTOR SEGURIDAD INTEGRAL",p:"CHIMBORAZO"},
+  {c:"15648",n:"BYRON ANIBAL PEREZ ZAVALA",cargo:"INSPECTOR SEGURIDAD INTEGRAL",p:"CHIMBORAZO"},
+  {c:"34737",n:"JOSE PATRICIO PILCO PILCO",cargo:"JEFE SEGURIDAD INTEGRAL",p:"CHIMBORAZO"},
+  {c:"34738",n:"BYRON ROBERTO SAGÑAY CASTAÑEDA",cargo:"INSPECTOR SEGURIDAD INTEGRAL",p:"CHIMBORAZO"},
+  {c:"133311",n:"JUAN PABLO YUQUILEMA VILEMA",cargo:"INSPECTOR SEGURIDAD INTEGRAL",p:"CHIMBORAZO"},
+  {c:"159400",n:"PAUL ALEXANDER RODRIGUEZ ZAMBRANO",cargo:"GERENTE SEGURIDAD INTEGRAL",p:"CHIMBORAZO"},
+  {c:"899",n:"ESTHELA BALVINA LEON CONTRERAS",cargo:"INSPECTOR SEGURIDAD INTEGRAL",p:"GUAPAN"},
+  {c:"1149",n:"DARIO JAVIER LOJANO ALTAMIRANO",cargo:"INSPECTOR SEGURIDAD INTEGRAL",p:"GUAPAN"},
+  {c:"759",n:"ANDREA CRISTINA SACOTO GARCIA",cargo:"JEFE DE SEGURIDAD INDUSTRIAL",p:"GUAPAN"},
+  {c:"1211",n:"BYRON DAVID ULLOA MARIN",cargo:"INSPECTOR SEGURIDAD INTEGRAL",p:"GUAPAN"},
+  {c:"885",n:"VICTOR ALFONSO URGILES RIVERA",cargo:"INSPECTOR SEGURIDAD INTEGRAL",p:"GUAPAN"},
+  {c:"36547",n:"FABRICIO STEVE BORJA VIVANCO",cargo:"ASISTENTE SEGURIDAD INDUSTRIAL",p:"QUITO"},
+  {c:"171200",n:"LUIS FELIPE VASCONEZ CHERREZ",cargo:"COORDINADOR DE SEGURIDAD AMBIENTAL",p:"QUITO"},
+  {c:"70735",n:"ROBERTO GERMAN ESTRELLA MATAMOROS",cargo:"COORDINADOR SEG. IND Y AMBIENT",p:"GUAYAQUIL"},
+  {c:"159398",n:"JONATHAN BRYAN JARAMILLO SANCHEZ",cargo:"SUPERVISOR DE SSAA",p:"MANTA"},
+  {c:"1190",n:"ALBERTO CAMILO GUAPISACA SIGUENZA",cargo:"INSPECTOR SEGURIDAD INTEGRAL",p:"CUENCA"},
+  {c:"174490",n:"ALFREDO MONSERRATE VILLALVA MACIAS",cargo:"INSPECTOR SEGURIDAD INTEGRAL",p:"ZULAY"}
+];
+</script>
+<script id="dataScript">
+var DATA = {"TORRE DE CALCINACIÓN":[{"ubicacion":"MCC COMPRESORES","tipo":"CO2","capacidad":"20","marca":"BUCKEYE"},{"ubicacion":"PARTE EXTERNA DE TRANSFORMADOR","tipo":"PQS","capacidad":"20","marca":"BUCKEYE"},{"ubicacion":"NIVEL 0 TORRE DE CALCINACIÓN","tipo":"PQS","capacidad":"20","marca":"BUCKEYE"},{"ubicacion":"ACCESO A LAS GRADAS DEL EDIFICIO DE PREMEZCLA NIVEL 0","tipo":"PQS","capacidad":"20","marca":"BUCKEYE"},{"ubicacion":"INGRESO DE AERODESLIZADORES A LOS ELEVADORES ENTRE NIVEL 0 Y NIVEL 1","tipo":"PQS","capacidad":"20","marca":"BUCKEYE"},{"ubicacion":"NIVEL 1: ACCESO A LAS GRADAS","tipo":"PQS","capacidad":"20","marca":"BUCKEYE"},{"ubicacion":"NIVEL 1: ACCESO A ASCENSOR","tipo":"PQS","capacidad":"20","marca":"BUCKEYE"},{"ubicacion":"NIVEL 1:  BIES LADO DE LAS GRADAS","tipo":"PQS","capacidad":"20","marca":"BUCKEYE"},{"ubicacion":"NIVEL 1:  BIES LADO DEL ASCENSOR","tipo":"PQS","capacidad":"20","marca":"BUCKEYE"},{"ubicacion":"NIVEL 1:  Ranfla","tipo":"CO2","capacidad":"20","marca":"BUCKEYE"},{"ubicacion":"NIVEL 2 : ACCESO A LAS GRADAS","tipo":"PQS","capacidad":"20","marca":"BUCKEYE"},{"ubicacion":"NIVEL 2 : ACCESO A ASCENSOR","tipo":"PQS","capacidad":"20","marca":"BUCKEYE"},{"ubicacion":"NIVEL 3 : ACCESO A LAS GRADAS","tipo":"PQS","capacidad":"20","marca":"BUCKEYE"},{"ubicacion":"NIVEL 3 : ACCESO A ASCENSOR","tipo":"PQS","capacidad":"20","marca":"BUCKEYE"},{"ubicacion":"NIVEL 4 : ACCESO A LAS GRADAS","tipo":"PQS","capacidad":"20","marca":"BUCKEYE"},{"ubicacion":"NIVEL 4 : ACCESO A ASCENSOR","tipo":"PQS","capacidad":"20","marca":"BUCKEYE"},{"ubicacion":"NIVEL 5: ACCESO A LAS GRADAS","tipo":"PQS","capacidad":"20","marca":"BUCKEYE"},{"ubicacion":"NIVEL 5:  ACCESO A ASCENSOR","tipo":"PQS","capacidad":"20","marca":"BUCKEYE"},{"ubicacion":"NIVEL 5:  PLATAFORMA NIVEL 2","tipo":"PQS","capacidad":"20","marca":"BUCKEYE"},{"ubicacion":"NIVEL 6: ACCESO A LAS GRADAS","tipo":"PQS","capacidad":"20","marca":"BUCKEYE"},{"ubicacion":"NIVEL 6: ACCESO A ASCENSOR","tipo":"PQS","capacidad":"20","marca":"BUCKEYE"},{"ubicacion":"NIVEL 7: ACCESO A LAS GRADAS","tipo":"PQS","capacidad":"20","marca":"BUCKEYE"},{"ubicacion":"NIVEL 7: ACCESO A ASCENSOR","tipo":"PQS","capacidad":"20","marca":"BUCKEYE"},{"ubicacion":"NIVEL 8: ACCESO A LAS GRADAS","tipo":"PQS","capacidad":"20","marca":"BUCKEYE"},{"ubicacion":"NIVEL 8: ACCESO A ASCENSOR","tipo":"PQS","capacidad":"20","marca":"BUCKEYE"},{"ubicacion":"MCC-TORRE Y HORNO-COMPUERTA DE ACCESO 1 A TRANSFORMADOR","tipo":"PQS","capacidad":"20","marca":"BUCKEYE"},{"ubicacion":"MCC-TORRE Y HORNO-COMPUERTA DE ACCESO 2 A TRANSFORMADOR","tipo":"PQS","capacidad":"20","marca":"BUCKEYE"}],"MCC HORNO":[{"ubicacion":"MCC HORNO PUERTA INGRESO","tipo":"CO2","capacidad":"20","marca":"BUCKEYE"},{"ubicacion":"MCC HORNO PUERTA  SALIDA","tipo":"PQS","capacidad":"20","marca":"BUCKEYE"}],"MCC MOLINO DE CRUDO":[{"ubicacion":"MCC  PUERTA DE INGRESO","tipo":"CO2","capacidad":"20","marca":"BUCKEYE"},{"ubicacion":"MCC PUERTA DE SALIDA","tipo":"CO2","capacidad":"20","marca":"BUCKEYE"}],"MCC HORNO MOLINO CUARTO DE BANDEJAS ELECTRICAS":[{"ubicacion":"CUARTO ELECTRICO INGRESO 1","tipo":"PQS","capacidad":"20","marca":"BUCKEYE"},{"ubicacion":"CUARTO ELECTRICO PUERTA DE SALIDA","tipo":"CO2","capacidad":"20","marca":"BUCKEYE"}],"CUARTO COMPRESORES":[{"ubicacion":"INGRESO CUARTO DE COMPRESORES","tipo":"PQS","capacidad":"20","marca":"BUCKEYE"}],"COMEDOR":[{"ubicacion":"Ingreso Gabinete","tipo":"PQS","capacidad":"10","marca":"CHINO"},{"ubicacion":"Puerta ingreso","tipo":"CO2","capacidad":"10","marca":"BUCKEYE"},{"ubicacion":"Comedor","tipo":"COLD FIRE","capacidad":"2.5","marca":"BUCKEYE"},{"ubicacion":"Comedor bodega","tipo":"COLD FIRE","capacidad":"2.5","marca":"BUCKEYE"}],"TRANSFORMADOR":[{"ubicacion":"Ingreso","tipo":"CO2","capacidad":"20","marca":"BUCKEYE"},{"ubicacion":"Ingreso","tipo":"CO2","capacidad":"10","marca":"BUCKEYE"}],"LABORATORIO":[{"ubicacion":"Pasillo","tipo":"CO2","capacidad":"10","marca":"BUCKEYE"},{"ubicacion":"Laboratorio de RX","tipo":"CO2","capacidad":"10","marca":"BUCKEYE"},{"ubicacion":"Ensayos Fisicos","tipo":"PQS","capacidad":"10","marca":"CHINO"}],"OFICINAS GERENCIAS PISO 2":[{"ubicacion":"Sala de reuniones","tipo":"CO2","capacidad":"10","marca":"BUCKEYE"}],"OFICINAS GERENCIAS PISO 3":[{"ubicacion":"Ingreso","tipo":"CO2","capacidad":"10","marca":"BUCKEYE"}],"PISO 3":[{"ubicacion":"Oficinas Administrativas","tipo":"CO2","capacidad":"10","marca":"BUCKEYE"}],"PISO 4":[{"ubicacion":"Cambiadores","tipo":"CO2","capacidad":"10","marca":"BUCKEYE"}],"PISO 5":[{"ubicacion":"Servidores","tipo":"CO2","capacidad":"10","marca":"BUCKEYE"}],"PISO 6":[{"ubicacion":"Oficina Supervisor","tipo":"CO2","capacidad":"10","marca":"BUCKEYE"}],"PISO 7":[{"ubicacion":"COP","tipo":"CO2","capacidad":"10","marca":"BUCKEYE"}],"PISO 8":[{"ubicacion":"Gabinete","tipo":"PQS","capacidad":"10","marca":"CHINO"}],"OFICINAS SSA":[{"ubicacion":"Junto a la puerta de Seguridad Industrial","tipo":"CO2","capacidad":"20","marca":"BUKELY"},{"ubicacion":"Interior de oficina","tipo":"PQS","capacidad":"20","marca":"BUKELY"}],"MOLINO DE PETCOKE":[{"ubicacion":"MCC PETCOKE 1","tipo":"CO2","capacidad":"20","marca":"BUCKEYE"},{"ubicacion":"MCC PETCOKE 2","tipo":"CO2","capacidad":"20","marca":"BUCKEYE"},{"ubicacion":"MCC PETCOKE 3","tipo":"CO2","capacidad":"20","marca":"GLOBAL"},{"ubicacion":"VALVULA ROTATIVA DE ALIMENTACIÓN","tipo":"CO2","capacidad":"10","marca":"BUCKEYE"},{"ubicacion":"INTERIOR DEL CUARTO DE SOPLADORES","tipo":"CO2","capacidad":"20","marca":"GLOBAL"},{"ubicacion":"EXTERIOR AL CUARTO DE SOPLADORES","tipo":"PQS","capacidad":"20","marca":"BUCKEYE"}],"TORRE Y HORNO":[{"ubicacion":"MCC-TORRE Y HORNO (JUNTO AL MCC-CRUDO)","tipo":"PQS","capacidad":"20 Lbs","marca":"BUCKEYE"},{"ubicacion":"MCC-TORRE Y HORNO (JUNTO AL MCC-CRUDO)","tipo":"PQS","capacidad":"21 Lbs","marca":"BUCKEYE"},{"ubicacion":"MCC-TORRE Y HORNO (JUNTO AL MCC-CRUDO)","tipo":"CO2","capacidad":"22 Lbs","marca":"BUCKEYE"},{"ubicacion":"MCC-TORRE Y HORNO (JUNTO AL MCC-CRUDO)","tipo":"CO2","capacidad":"23 Lbs","marca":"BUCKEYE"},{"ubicacion":"CUARTO ELECTRICO INGRESO 1 (PLANTA BAJA)","tipo":"PQS","capacidad":"20 Lbs","marca":"BUCKEYE"},{"ubicacion":"CUARTO ELECTRICO INGRESO 1 (PLANTA BAJA)","tipo":"PQS","capacidad":"10 Lbs","marca":"SIN MARCA"},{"ubicacion":"CUARTO ELECTRICO INGRESO 2 (PLANTA BAJA)","tipo":"PQS","capacidad":"20 Lbs","marca":"BUCKEYE"},{"ubicacion":"CUARTO ELECTRICO INGRESO 2 (PLANTA BAJA)","tipo":"PQS","capacidad":"10 Lbs","marca":"SIN MARCA"},{"ubicacion":"INGRESO CUARTO DE COMPRESORES (PARTE BAJA TORRE PRECALCINACION)","tipo":"PQS","capacidad":"20 Lbs","marca":"BUCKEYE"},{"ubicacion":"MCC COMPRESORES (PARTE BAJA TORRE PRECALCINACION)","tipo":"CO2","capacidad":"20 Lbs","marca":"BUCKEYE"},{"ubicacion":"MCC COMPRESORES (PARTE BAJA TORRE PRECALCINACION)","tipo":"CO3","capacidad":"21 Lbs","marca":"BUCKEYE"},{"ubicacion":"COMPUERTA DE ACCESO  A TRANSFORMADOR-TORRE","tipo":"PQS","capacidad":"20 Lbs","marca":"BUCKEYE"},{"ubicacion":"INYECTOR COMBUSTIBLE- FRENTE AL INYECTOR DE COMBUSTIBLE 2° PISO HORNO","tipo":"PQS","capacidad":"20 Lbs","marca":"BUCKEYE"},{"ubicacion":"INYECTOR COMBUSTIBLE - FRENTE AL DUCTO DE AIRE TERCIARIO(DAT) 3 PISO","tipo":"PQS","capacidad":"20 Lbs","marca":"BUCKEYE"}],"ENFRIADOR":[{"ubicacion":"EDIFICIO DEL INTERCAMBIADOR DE CALOR(DESEMPOLVADO DEL ENFRIADOR)","tipo":"PQS","capacidad":"20 Lbs","marca":"BUCKEYE"},{"ubicacion":"EDIFICIO DEL INTERCAMBIADOR DE CALOR(DESEMPOLVADO DEL ENFRIADOR) JUNTO A FILTRO 4T1.BF01","tipo":"PQS","capacidad":"20 Lbs","marca":"BUCKEYE"},{"ubicacion":"EDIFICIO DEL INTERCAMBIADOR DE CALOR(DESEMPOLVADO DEL ENFRIADOR) (FRENTE AL TORNILLO SIN FIN 4S1.AE01)","tipo":"PQS","capacidad":"20 Lbs","marca":"BUCKEYE"},{"ubicacion":"VENTILADOR INTERCAMBIADOR DE CALOR 4S1.FN01","tipo":"PQS","capacidad":"20 Lbs","marca":"BUCKEYE"},{"ubicacion":"PARTE EXTERNA DEL ENFRIADOR (VENTILADORES)","tipo":"PQS","capacidad":"20 Lbs","marca":"BUCKEYE"},{"ubicacion":"PARTE EXTERNA DEL ENFRIADOR UNIDAD DE LUBRICACION","tipo":"","capacidad":"20 Lbs","marca":"BUCKEYE"},{"ubicacion":"CUARTO DE BOMBAS DEL SISTEMA  HIDRAULICO DEL POLITRACK","tipo":"PQS","capacidad":"20 Lbs","marca":"BUCKEYE"},{"ubicacion":"CUARTO DE BOMBAS DEL SISTEMA  HIDRAULICO DEL POLITRACK","tipo":"CO2","capacidad":"20 Lbs","marca":"BUCKEYE"},{"ubicacion":"MCC ENFRIADOR","tipo":"PQS","capacidad":"20 Lbs","marca":"BUCKEYE"},{"ubicacion":"MCC ENFRIADOR","tipo":"CO2","capacidad":"20 Lbs","marca":"BUCKEYE"},{"ubicacion":"CUARTO ELECTRICO INGRESO 1 (PLANTA BAJA)","tipo":"PQS","capacidad":"20 Lbs","marca":"BUCKEYE"},{"ubicacion":"CUARTO ELECTRICO INGRESO 1 (PLANTA BAJA)","tipo":"CO2","capacidad":"20 Lbs","marca":"BUCKEYE"},{"ubicacion":"CUARTO ELECTRICO INGRESO 2 (PLANTA BAJA)","tipo":"PQS","capacidad":"20 Lbs","marca":"BUCKEYE"},{"ubicacion":"CUARTO ELECTRICO INGRESO 2 (PLANTA BAJA)","tipo":"CO2","capacidad":"20 Lbs","marca":"BUCKEYE"},{"ubicacion":"MCC-COMPUERTA DE ACCESO A TRANSFORMADOR-ENFRIADOR","tipo":"CO2","capacidad":"20 Lbs","marca":"BUCKEYE"}],"BOMBAS DE AGUA":[{"ubicacion":"MCC BOMBAS DE AGUA","tipo":"CO2","capacidad":"20 Lbs","marca":"BUCKEYE"},{"ubicacion":"MCC BOMBAS DE AGUA","tipo":"CO3","capacidad":"21 Lbs","marca":"BUCKEYE"}],"SUB ESTACIÓN ELECTRICA":[{"ubicacion":"CELDAS  EN LA SUB ESTACIÓN PRINCIPAL","tipo":"M","capacidad":"20 Lbs","marca":"BUCKEYE"},{"ubicacion":"CELDAS  EN LA SUB ESTACIÓN PRINCIPAL","tipo":"M","capacidad":"21 Lbs","marca":"BUCKEYE"},{"ubicacion":"SUB ESTACIÓN  CUARTO DE BANDEJAS  (SUBTERRANEO)","tipo":"PQS","capacidad":"10 Lbs","marca":"SIN MARCA"},{"ubicacion":"GENERADOR DE EMERGENCIA","tipo":"CO2","capacidad":"10 Lbs","marca":"TRITON"},{"ubicacion":"TRANSFORNADOR SERV. AUXILIARES","tipo":"CO2","capacidad":"100 Lbs","marca":"BUCKEYE"},{"ubicacion":"TRANSFORMADOR PRINCIPAL TR2","tipo":"CO3","capacidad":"101 Lbs","marca":"BUCKEYE"},{"ubicacion":"TRANSFORMADOR PRINCIPAL TR1","tipo":"CO4","capacidad":"102 Lbs","marca":"BUCKEYE"}],"SILO DE CLINKER":[{"ubicacion":"TRANSPORTADOR DE PALCAS 4T1.AY01","tipo":"PQS","capacidad":"20 Lbs","marca":"BUCKEYE"},{"ubicacion":"COMPUERTA DESCARGA SILO CLINKER","tipo":"PQS","capacidad":"21 Lbs","marca":"BUCKEYE"}],"SILO DE INCOCIDOS":[{"ubicacion":"VENTILADOR 4U1-BF01","tipo":"PQS","capacidad":"20 Lbs","marca":"BUCKEYE"},{"ubicacion":"MANGA DESCARGA GRANEL","tipo":"PQS","capacidad":"21 Lbs","marca":"BUCKEYE"}],"HORMIGONERA":[{"ubicacion":"GENERADOR DE EMERGENCIA","tipo":"PQS","capacidad":"20 Lbs","marca":"BUCKEYE"},{"ubicacion":"LABORATORIO DE C.C.","tipo":"PQS","capacidad":"10 Lbs","marca":"BUCKEYE"}],"BOMBAS DE COMBUSTIBLE":[{"ubicacion":"RECPECION DE COMBUSTIBLE HORNO","tipo":"CO2","capacidad":"20 Lbs","marca":"BUCKEYE"}],"OFICINAS DE MANTENIMIENTO":[{"ubicacion":"OFICNAS DE MANTENIMIENTO","tipo":"CO2","capacidad":"20 Lbs","marca":"BUCKEYE"}],"Trituración":[{"ubicacion":"Sala eléctrica báscula","tipo":"CO2","capacidad":"20 Lbs","marca":"SIN MARCA"},{"ubicacion":"Báscula","tipo":"CO2","capacidad":"20 Lbs","marca":"SIN MARCA"},{"ubicacion":"Tolva de descarga","tipo":"PQS","capacidad":"20 Lbs","marca":"AMEREX"},{"ubicacion":"Trituradora","tipo":"PQS","capacidad":"20 Lbs","marca":"BUCKEYE"},{"ubicacion":"MCC Trituradora","tipo":"CO2","capacidad":"20 Lbs","marca":"BUCKEYE"},{"ubicacion":"MCC Trituradora","tipo":"PQS","capacidad":"20 Lbs","marca":"BUCKEYE"},{"ubicacion":"Cuarto de Bandejas","tipo":"PQS","capacidad":"20 Lbs","marca":"BUCKEYE"},{"ubicacion":"Plataforma Banda 2D1-BC01","tipo":"PQS","capacidad":"20 Lbs","marca":"BUCKEYE"},{"ubicacion":"Transformador Trituración","tipo":"CO2","capacidad":"10 Lbs","marca":"SIN MARCA"},{"ubicacion":"Torre de Transferencia","tipo":"PQS","capacidad":"20 Lbs","marca":"BUCKEYE"},{"ubicacion":"Torre de Transferencia (Banda 2E1-BC02 hacia el Parque Lineal)","tipo":"PQS","capacidad":"20 Lbs","marca":"BUCKEYE"},{"ubicacion":"Tolvas de Recepcion de Arcilla","tipo":"PQS","capacidad":"10 Lbs","marca":"SIN MARCA"},{"ubicacion":"Cuarto sistema contra incendios","tipo":"CO2","capacidad":"20 Lbs","marca":"BUCKEYE"},{"ubicacion":"Tratamiento de agua","tipo":"CO2","capacidad":"20 Lbs","marca":"BUCKEYE"},{"ubicacion":"Tratamiento de agua","tipo":"PQS","capacidad":"20 Lbs","marca":"BUCKEYE"}],"Parque Circular":[{"ubicacion":"Ingreso a Parque Circular","tipo":"PQS","capacidad":"20 Lbs","marca":"BUCKEYE"}],"Parque Lineal":[{"ubicacion":"MCC Parque Lineal","tipo":"CO2","capacidad":"20 Lbs","marca":"SIN MARCA"},{"ubicacion":"MCC Parque Lineal","tipo":"PQS","capacidad":"20 Lbs","marca":"BUCKEYE"},{"ubicacion":"Apilador","tipo":"PQS","capacidad":"20 Lbs","marca":"BUCKEYE"},{"ubicacion":"Cabina de Apilador","tipo":"PQS","capacidad":"10 Lbs","marca":"SIN MARCA"},{"ubicacion":"Reclamador","tipo":"PQS","capacidad":"20 Lbs","marca":"BUCKEYE"},{"ubicacion":"Cabina de Reclamador","tipo":"CO2","capacidad":"10 Lbs","marca":"SIN MARCA"}],"Parque Lineal Petcoke":[{"ubicacion":"Ingreso al Hangar de Petcoke","tipo":"PQS","capacidad":"20 Lbs","marca":"BUCKEYE"},{"ubicacion":"Cuarto electrico","tipo":"CO2","capacidad":"20 Lbs","marca":"BUCKEYE"}],"Secador de Arcilla":[{"ubicacion":"Ingreso al MCC del secador","tipo":"CO2","capacidad":"15 Lbs","marca":"BUCKEYE"}],"Equipo Pesado Planta 3":[{"ubicacion":"Cargadora B-56","tipo":"","capacidad":"","marca":""}],"Molino  de Crudo":[{"ubicacion":"Cabeza del Elevador Retorno","tipo":"PQS","capacidad":"10 Lbs","marca":"SIN MARCA"},{"ubicacion":"Banda de alimentación al molino(3F.BC-02)","tipo":"PQS","capacidad":"20 Lbs","marca":"BUCKEYE"},{"ubicacion":"Plataforma Válvula Rotativa","tipo":"PQS","capacidad":"20 Lbs","marca":"BUCKEYE"},{"ubicacion":"Plataforma Banda de Rechazo (3F1.BC03)","tipo":"PQS","capacidad":"20 Lbs","marca":"BUCKEYE"},{"ubicacion":"Bota  del elevador 3F1-BE01","tipo":"PQS","capacidad":"20 Lbs","marca":"BUCKEYE"},{"ubicacion":"Frente a la central hidraulica","tipo":"PQS","capacidad":"20 Lbs","marca":"BUCKEYE"},{"ubicacion":"Parte posterior central hidraulica","tipo":"PQS","capacidad":"20 Lbs","marca":"BUCKEYE"},{"ubicacion":"Ingreso al MCC del molino","tipo":"CO2","capacidad":"20 Lbs","marca":"BUCKEYE"},{"ubicacion":"MCC del molino","tipo":"CO2","capacidad":"20 Lbs","marca":"BUCKEYE"},{"ubicacion":"MCC del molino","tipo":"PQS","capacidad":"20 Lbs","marca":"BUCKEYE"},{"ubicacion":"Cuarto de Bandejas MCC","tipo":"PQS","capacidad":"20 Lbs","marca":"BUCKEYE"},{"ubicacion":"Cuarto de Bandejas MCC","tipo":"PQS","capacidad":"10 Lbs","marca":"SIN MARCA"},{"ubicacion":"Cicloneta 1 parte superior","tipo":"PQS","capacidad":"20 Lbs","marca":"BUCKEYE"},{"ubicacion":"Cicloneta 2 parte superior","tipo":"PQS","capacidad":"20 Lbs","marca":"BUCKEYE"},{"ubicacion":"Cuello de cisne ciclonetas","tipo":"PQS","capacidad":"20 Lbs","marca":"BUCKEYE"},{"ubicacion":"Aerodeslizador salida de ciclonetas","tipo":"PQS","capacidad":"20 Lbs","marca":"BUCKEYE"},{"ubicacion":"Transformador bajo el MCC","tipo":"C02","capacidad":"15 Lbs","marca":"SIN MARCA"}],"Silo  de Crudo":[{"ubicacion":"Base del silo (externa)","tipo":"PQS","capacidad":"20 Lbs","marca":"BUCKEYE"},{"ubicacion":"Banda de transporte de crudo hacia planta 2","tipo":"PQS","capacidad":"20 Lbs","marca":"BUCKEYE"},{"ubicacion":"Distribuidor de harina (interior del silo)","tipo":"PQS","capacidad":"20 Lbs","marca":"BUCKEYE"}],"Premezcla":[{"ubicacion":"Válvulas Kinetrol","tipo":"PQS","capacidad":"20 Lbs","marca":"BUCKEYE"},{"ubicacion":"Silo premezcla","tipo":"PQS","capacidad":"20 Lbs","marca":"BUCKEYE"},{"ubicacion":"Distribuidor harina premezcla","tipo":"PQS","capacidad":"20 Lbs","marca":"BUCKEYE"},{"ubicacion":"Cabeza del elevador premezcla","tipo":"PQS","capacidad":"20 Lbs","marca":"BUCKEYE"},{"ubicacion":"Bota  del elevador premezcla","tipo":"PQS","capacidad":"20 Lbs","marca":"BUCKEYE"}],"Edificio  de Tolvas":[{"ubicacion":"MCC Tolvas","tipo":"CO2","capacidad":"20 Lbs","marca":"BUCKEYE"},{"ubicacion":"MCC Tolvas","tipo":"PQS","capacidad":"20 Lbs","marca":"BUCKEYE"},{"ubicacion":"Ingreso al MCC de Tolvas","tipo":"CO2","capacidad":"20 Lbs","marca":"BUCKEYE"},{"ubicacion":"Banda de alimentación 3E1-BC02 Cola","tipo":"PQS","capacidad":"20 Lbs","marca":"BUCKEYE"},{"ubicacion":"Mesas Dosificadoras","tipo":"PQS","capacidad":"20 Lbs","marca":"BUCKEYE"},{"ubicacion":"Banda de alimentación 3C2-BC03","tipo":"PQS","capacidad":"20 Lbs","marca":"BUCKEYE"},{"ubicacion":"Descarga Tolva de Caliza","tipo":"PQS","capacidad":"20 Lbs","marca":"BUCKEYE"},{"ubicacion":"Banda de alimentación 3C2-BC02 Cola","tipo":"PQS","capacidad":"20 Lbs","marca":"BUCKEYE"},{"ubicacion":"Compuerta Desvio 3C2-CF01","tipo":"PQS","capacidad":"20 Lbs","marca":"BUCKEYE"},{"ubicacion":"Banda de alimentación 3C2-BC02 Descarga","tipo":"PQS","capacidad":"20 Lbs","marca":"BUCKEYE"},{"ubicacion":"Parte externa de aire acondicionado","tipo":"PQS","capacidad":"20 Lbs","marca":"BUCKEYE"}],"PLANTA 1":[{"ubicacion":"GARITA","tipo":"PQS","capacidad":"20","marca":"Kleyar"}],"PLANTA 2":[{"ubicacion":"OFICINA TIC´S","tipo":"PQS","capacidad":"20","marca":"Kleyar"},{"ubicacion":"GARITA","tipo":"C02","capacidad":"15","marca":"KLEYAR"}],"PLANTA 3":[{"ubicacion":"OFICINA SERVICIOS GENERALES","tipo":"PQS","capacidad":"20","marca":"Kleyar"},{"ubicacion":"GARITA","tipo":"C02","capacidad":"10","marca":"KLEYAR"}],"PLANTA 4":[{"ubicacion":"AFICINAS ANTIGUAS DE MTTO","tipo":"PQS","capacidad":"10","marca":"Kleyar"}],"PLANTA 5":[{"ubicacion":"TANQUE DE DIESEL","tipo":"PQS","capacidad":"20","marca":"SECURITY GLOBAL"}],"PLANTA 6":[{"ubicacion":"SUBESTACION","tipo":"PQS","capacidad":"20","marca":"Kleyar"}],"PALETIZADO":[{"ubicacion":"OFICINA","tipo":"PQS","capacidad":"20","marca":"Kleyar"},{"ubicacion":"SALA DE COMPRESORES","tipo":"PQS","capacidad":"20","marca":"Kleyar"},{"ubicacion":"CUARTO ELÉCTRICO","tipo":"PQS","capacidad":"20","marca":"Kleyar"},{"ubicacion":"CUARTO ELÉCTRICO","tipo":"C02","capacidad":"20","marca":"Kleyar"},{"ubicacion":"NAVE DE PALETIZADO","tipo":"PQS","capacidad":"20","marca":"Kleyar"},{"ubicacion":"NAVE DE PALETIZADO.","tipo":"C02","capacidad":"20","marca":"Kleyar"},{"ubicacion":"NAVE DE PALETIZADO","tipo":"PQS","capacidad":"125","marca":"Kleyar"},{"ubicacion":"MONTACARGA B70","tipo":"PQS","capacidad":"10","marca":"KLEYAR"},{"ubicacion":"TANQUES DE GLP","tipo":"PQS","capacidad":"20","marca":"Kleyar"}],"MOLINOS DE CEMENTO":[{"ubicacion":"CM4-C.E","tipo":"C02","capacidad":"15","marca":"Kleyar"},{"ubicacion":"CM4 -CELDAS","tipo":"C02","capacidad":"15","marca":"Kleyar"},{"ubicacion":"SECADOR DE PUZOLANA","tipo":"C02","capacidad":"15","marca":"Kleyar"},{"ubicacion":"CABINA-CM4","tipo":"PQS","capacidad":"20","marca":"Kleyar"},{"ubicacion":"CCM.CM4-5","tipo":"PQS","capacidad":"15","marca":"Kleyar"},{"ubicacion":"QUEMADOR DE GASES CM5","tipo":"C02","capacidad":"20","marca":"Kleyar"},{"ubicacion":"BASE MOLINO CM5","tipo":"PQS","capacidad":"20","marca":"Kleyar"},{"ubicacion":"CUARTO ELECTRICO CM5 INTERIOR","tipo":"C02","capacidad":"20","marca":"Kleyar"},{"ubicacion":"TANQUE DE COMBUSTIBLE BUNKER","tipo":"C02","capacidad":"15","marca":"Kleyar"}],"EQUIPO MÓVIL":[{"ubicacion":"VESTIDORES","tipo":"PQS","capacidad":"","marca":""},{"ubicacion":"TALLER","tipo":"PQS","capacidad":"20","marca":"Kleyar"},{"ubicacion":"OFICINA","tipo":"PQS","capacidad":"10","marca":"Kleyar"}],"MANTENIMIENTO MECÁNICO":[{"ubicacion":"TALLER MECANICO","tipo":"C02","capacidad":"10","marca":"Kleyar"},{"ubicacion":"TALLER DE FRAGUA","tipo":"PQS","capacidad":"","marca":""},{"ubicacion":"TALLER DE SUELDA","tipo":"PQS","capacidad":"10","marca":"Kleyar"}],"MANTENIMIENTO ELÉCTRICO":[{"ubicacion":"TALLER ELÉCTRICO","tipo":"PQS","capacidad":"20","marca":"Kleyar"}],"EQUIPO PESADO":[{"ubicacion":"B56-CARGADORA","tipo":"PQS","capacidad":"","marca":""}],"BODEGA GENERAL":[{"ubicacion":"BODEGA CENTRAL","tipo":"C02","capacidad":"20","marca":"KLEYAR"},{"ubicacion":"BODEGA CENTRAL","tipo":"PQS","capacidad":"10","marca":"KLEYAR"},{"ubicacion":"BODEGA CENTRAL","tipo":"PQS","capacidad":"20","marca":"KLEYAR"}],"TRITURADORA SECUNDARIA":[{"ubicacion":"CUARTO DE CONTROL","tipo":"PQS","capacidad":"20","marca":"KLEYAR"}],"PREFABRICADOS":[{"ubicacion":"NAVE INDUSTRIAL","tipo":"PQS","capacidad":"10","marca":"KLEYAR"},{"ubicacion":"NAVE INDUSTRIAL","tipo":"PQS","capacidad":"100","marca":"KLEYAR"},{"ubicacion":"NAVE INDUSTRIAL","tipo":"PQS","capacidad":"20","marca":"KLEYAR"},{"ubicacion":"NAVE INDUSTRIAL","tipo":"C02","capacidad":"","marca":""},{"ubicacion":"TALLER MECÁNICO","tipo":"C02","capacidad":"10","marca":"KLEYAR"},{"ubicacion":"ACOPIO DESECHOS PELIGROSOS","tipo":"C02","capacidad":"20","marca":"KLEYAR"},{"ubicacion":"TANQUES DE COMBUSTIBLE","tipo":"PQS","capacidad":"100","marca":"KLEYAR"},{"ubicacion":"GARITA","tipo":"PQS","capacidad":"10","marca":"KLEYAR"},{"ubicacion":"OFICINA DE PROYECTOS Y MINA","tipo":"C02","capacidad":"15","marca":"KLEYAR"}],"MINA SHOBOL":[{"ubicacion":"CABEZAL C-10","tipo":"PQS","capacidad":"5 lb","marca":"KLEYAR"},{"ubicacion":"CABEZAL C-13","tipo":"PQS","capacidad":"10 lb","marca":"KLEYAR"},{"ubicacion":"CABEZAL C-14","tipo":"PQS","capacidad":"5 lb","marca":"KLEYAR"},{"ubicacion":"CABEZAL C-17","tipo":"PQS","capacidad":"5 lb","marca":"KLEYAR"},{"ubicacion":"CABEZAL C-102","tipo":"PQS","capacidad":"5 lb","marca":"KLEYAR"},{"ubicacion":"CABEZAL Y-50","tipo":"PQS","capacidad":"10 lb","marca":"KLEYAR"},{"ubicacion":"CABEZAL Y-77","tipo":"PQS","capacidad":"5 lb","marca":"KLEYAR"},{"ubicacion":"VOLQUETA Y-59","tipo":"PQS","capacidad":"5 lb","marca":"KLEYAR"},{"ubicacion":"EXCAVADORA B-62","tipo":"PQS","capacidad":"10 lb","marca":"KLEYAR"},{"ubicacion":"EXCAVADORA B-81","tipo":"PQS","capacidad":"10 lb","marca":"KLEYAR"},{"ubicacion":"EXCAVADORA B-92","tipo":"PQS","capacidad":"10 lb","marca":"KLEYAR"},{"ubicacion":"EXCAVADORA B-93","tipo":"PQS","capacidad":"10 lb","marca":"KLEYAR"},{"ubicacion":"TRACTOR B-61","tipo":"PQS","capacidad":"10 lb","marca":"KLEYAR"},{"ubicacion":"PERFORADORA X-25","tipo":"PQS","capacidad":"10 lb","marca":"KLEYAR"},{"ubicacion":"MOTONIVELADORA X-18","tipo":"PQS","capacidad":"05 lb","marca":"KLEYAR"},{"ubicacion":"RODILLO X-19","tipo":"PQS","capacidad":"5 lb","marca":"KLEYAR"},{"ubicacion":"DUMPER B58","tipo":"PQS","capacidad":"10 lb","marca":"KLEYAR"},{"ubicacion":"ÁREA DE COMBUSTIBLE","tipo":"CO2","capacidad":"15 lb","marca":"KLEYAR"},{"ubicacion":"CUARTO DE TRANSFORMADOR","tipo":"CO2","capacidad":"15 lb","marca":"KLEYAR"},{"ubicacion":"OFICINAS ADMINISTRATIVAS 1","tipo":"PQS","capacidad":"10 lb","marca":"KLEYAR"},{"ubicacion":"OFICINAS ADMINISTRATIVAS 2","tipo":"PQS","capacidad":"10 lb","marca":"KLEYAR"},{"ubicacion":"OFICINAS ADMINISTRATIVAS 3","tipo":"PQS","capacidad":"10 lb","marca":"KLEYAR"},{"ubicacion":"TALLER MECÁNICO","tipo":"PQS","capacidad":"10 lb","marca":"KLEYAR"},{"ubicacion":"ÁREA DE RESIDUOS PELIGROSOS","tipo":"PQS","capacidad":"10 lb","marca":"KLEYAR"},{"ubicacion":"CAMIONETA R87","tipo":"PQS","capacidad":"2,5 lb","marca":"KLEYAR"}],"HIDROELÉCTRICA":[{"ubicacion":"CENTRAL HIDROELÉCTRICA","tipo":"PQS","capacidad":"20 lb","marca":"BUCKEYE"}]};
+</script>
+<script>
 // ======= INIT =======
 window.onload = function() {
-  goP0(); // ARRANQUE FORZADO[cite: 1]
   cargarAreas();
   document.getElementById('codInput').addEventListener('input', function() { buscar(this.value); });
   document.getElementById('btnP1').addEventListener('click', goP1);
@@ -246,22 +292,45 @@ window.onload = function() {
   document.getElementById('btnVolverReg').addEventListener('click', goP0);
 };
 
-// --- LOGICA DE NAVEGACION ---
-function show(id) {
-  ['p0','p1','p2','p3','p4','pReg'].forEach(function(p) { 
-    var el = document.getElementById(p);
-    el.classList.add('hidden');
-    el.style.display = 'none'; // Asegura que se oculte[cite: 1]
+function cargarAreas() {
+  var sel = document.getElementById('areaS');
+  var dupSel = document.getElementById('dupArea');
+  var prev = sel.value;
+  sel.innerHTML = '<option value="">-- Seleccione área --</option>';
+  dupSel.innerHTML = '<option value="">-- Seleccione área --</option>';
+  var custom = JSON.parse(localStorage.getItem('ucem_custom_areas') || '{}');
+  var areas = Object.keys(DATA).sort();
+  var customAreas = Object.keys(custom).sort();
+  customAreas.forEach(function(a) { if (areas.indexOf(a) < 0) areas.push(a); });
+  areas.sort().forEach(function(a) {
+    var o = document.createElement('option');
+    o.value = a; o.textContent = a + (custom[a] ? ' ★' : '');
+    sel.appendChild(o);
+    var o2 = document.createElement('option');
+    o2.value = a; o2.textContent = a + (custom[a] ? ' ★' : '');
+    dupSel.appendChild(o2);
   });
-  var target = document.getElementById(id);
-  target.classList.remove('hidden');
-  target.style.display = 'block'; // Lo hace visible sí o sí[cite: 1]
+  if (prev) sel.value = prev;
 }
 
-function setS(n) {
-  for (var i = 0; i <= 4; i++) {
-    var el = document.getElementById('s' + i);
-    if (el) el.className = 'step' + (i < n ? ' done' : i === n ? ' active' : '');
+function buscar(v) {
+  var t = null;
+  for (var i = 0; i < TRABAJADORES.length; i++) {
+    if (TRABAJADORES[i].c === v.trim()) { t = TRABAJADORES[i]; break; }
+  }
+  var card = document.getElementById('tCard');
+  var err = document.getElementById('tErr');
+  if (t) {
+    tActual = t;
+    document.getElementById('tNom').textContent = t.n;
+    document.getElementById('tDet').textContent = t.cargo + ' · Planta ' + t.p;
+    card.classList.remove('hidden');
+    err.classList.add('hidden');
+  } else {
+    tActual = null;
+    card.classList.add('hidden');
+    if (v.length >= 3) err.classList.remove('hidden');
+    else err.classList.add('hidden');
   }
 }
 
@@ -269,72 +338,669 @@ function goP0() { show('p0'); setS(0); }
 
 function goP1() {
   var sel = document.getElementById('plantaSelect').value;
-  if (!sel) { alert('Selecciona planta'); return; }
-  plantaActual = sel; esChimborazo = (sel === 'Planta Chimborazo');
+  if (!sel) { alert('Selecciona una planta para continuar.'); return; }
+  plantaActual = sel;
+  esChimborazo = (sel === 'Planta Chimborazo');
+  document.getElementById('hPlantaNombre').textContent = sel;
+  document.getElementById('plantaBarNombre').textContent = sel;
+  // Mostrar sección correcta en P1
   document.getElementById('p1Chimborazo').classList.toggle('hidden', !esChimborazo);
   document.getElementById('p1Generica').classList.toggle('hidden', esChimborazo);
+  // Mostrar sección correcta en P2
+  document.getElementById('p2Chimborazo').classList.toggle('hidden', !esChimborazo);
+  document.getElementById('p2Generica').classList.toggle('hidden', esChimborazo);
   show('p1'); setS(1);
 }
 
 function goP2() {
-  if (!esChimborazo && !document.getElementById('nombreLibre').value) { alert('Nombre requerido'); return; }
-  if (esChimborazo && !tActual) { alert('Código requerido'); return; }
+  if (esChimborazo) {
+    if (!tActual) { alert('Ingresa un código de trabajador válido.'); return; }
+  } else {
+    var nombre = document.getElementById('nombreLibre').value.trim();
+    var cargo = document.getElementById('cargoLibre').value.trim();
+    if (!nombre || !cargo) { alert('Ingresa nombre y cargo del inspector.'); return; }
+    tActual = { n: nombre, cargo: cargo, c: '', p: plantaActual };
+  }
   show('p2'); setS(2);
 }
-
 function goP3() {
-  var area = esChimborazo ? document.getElementById('areaS').value : document.getElementById('areaLibre').value;
-  if (!area) { alert('Área requerida'); return; }
-  buildTable(area, parseInt(document.getElementById('numExt').value));
-  show('p3'); setS(3);
-}
-
-// --- FUNCIONES CORE ---
-function cargarAreas() {
-  var sel = document.getElementById('areaS');
-  sel.innerHTML = '<option value="">-- Seleccione --</option>';
-  Object.keys(DATA).sort().forEach(function(a) {
-    var o = document.createElement('option'); o.value = a; o.textContent = a; sel.appendChild(o);
-  });
-}
-
-function buscar(v) {
-  var t = TRABAJADORES.find(x => x.c === v.trim());
-  var card = document.getElementById('tCard');
-  if (t) {
-    tActual = t; document.getElementById('tNom').textContent = t.n; card.classList.remove('hidden');
-  } else { tActual = null; card.classList.add('hidden'); }
+  var area, n;
+  n = parseInt(document.getElementById('numExt').value) || 1;
+  if (esChimborazo) {
+    area = document.getElementById('areaS').value;
+    if (!area) { alert('Selecciona un área.'); return; }
+  } else {
+    area = document.getElementById('areaLibre').value.trim();
+    if (!area) { alert('Escribe el área a inspeccionar.'); return; }
+  }
+  buildTable(area, n);
+  show('p3');
+  setS(3);
 }
 
 function buildTable(area, n) {
-  var tbody = document.getElementById('extBody'); tbody.innerHTML = '';
+  var custom = JSON.parse(localStorage.getItem('ucem_custom_areas') || '{}');
+  var baseUbics = DATA[area] || [];
+  var customUbics = custom[area] || [];
+  var ubics = baseUbics.concat(customUbics);
+  var tbody = document.getElementById('extBody');
+  tbody.innerHTML = '';
+
   for (var i = 0; i < n; i++) {
+    var pre = ubics[i] || {};
+
+    // ubicacion: selector para Chimborazo, texto libre para otras plantas
+    var ubicacionCell = '';
+    if (esChimborazo && ubics.length > 0) {
+      var ubOpts = '';
+      for (var j = 0; j < ubics.length; j++) {
+        ubOpts += '<option value="' + ubics[j].ubicacion + '"' + (j === i ? ' selected' : '') + '>' + ubics[j].ubicacion + '</option>';
+      }
+      ubicacionCell =
+        '<div style="display:flex;gap:4px;align-items:center">' +
+          '<select style="min-width:180px" id="ubicSel-' + i + '">' + ubOpts + '</select>' +
+          '<button type="button" onclick="toggleNuevaUbicFila(' + i + ')" style="flex-shrink:0;width:26px;height:26px;border-radius:50%;border:1.5px solid var(--azul);background:#f0f7ff;color:var(--azul);font-size:16px;font-weight:700;cursor:pointer">+</button>' +
+        '</div>' +
+        '<div id="nuevaUbicFila-' + i + '" style="display:none;margin-top:6px;background:#eef5fd;border:1px solid #b3d4f5;border-radius:6px;padding:8px;">' +
+          '<div style="font-size:10px;color:var(--azul);font-weight:600;margin-bottom:5px;">NUEVA UBICACIÓN</div>' +
+          '<input type="text" id="nuevaUbicInput-' + i + '" placeholder="Escribe la ubicación..." style="margin-bottom:5px;font-size:12px;padding:5px 8px;">' +
+          '<button type="button" onclick="agregarUbicFila(' + i + ')" style="width:100%;padding:5px;background:var(--azul);color:#fff;border:none;border-radius:4px;font-size:12px;font-weight:600;cursor:pointer">Agregar</button>' +
+        '</div>';
+    } else {
+      ubicacionCell = '<input type="text" id="ubicSel-' + i + '" placeholder="Ej: Bodega, Oficina..." style="min-width:180px" value="' + (pre.ubicacion || '') + '">';
+    }
+
+    // tipo options
+    var tipoOpts = '';
+    for (var t = 0; t < TIPOS.length; t++) {
+      tipoOpts += '<option value="' + TIPOS[t] + '"' + (TIPOS[t] === (pre.tipo || '') ? ' selected' : '') + '>' + TIPOS[t] + '</option>';
+    }
+
+    // caps options
+    var capVal = (pre.capacidad || '').replace(' Lbs','').replace(' lb','').trim();
+    var capsOpts = '';
+    for (var c = 0; c < CAPS.length; c++) {
+      capsOpts += '<option value="' + CAPS[c] + '"' + (CAPS[c] === capVal ? ' selected' : '') + '>' + CAPS[c] + ' Lbs</option>';
+    }
+
+    // Para plantas genéricas, tipo y capacidad son texto/select igual pero marca libre
+    var tipoCell = '<select style="min-width:80px"><option value="">--</option>' + tipoOpts + '</select>';
+    var capCell = '<select style="min-width:80px">' + capsOpts + '</select>';
+
+    // servicio options
+    var srvOpts = '<option value="">--</option>';
+    for (var s = 0; s < SERVICIOS.length; s++) {
+      srvOpts += '<option value="' + SERVICIOS[s] + '">' + SERVICIOS[s] + '</option>';
+    }
+
+    // cns items con observaciones por NC
+    var cnsHTML = '';
+    for (var k = 0; k < ITEMS.length; k++) {
+      cnsHTML += '<td><div class="cns">';
+      cnsHTML += '<button class="cb2" type="button">C</button>';
+      cnsHTML += '<button class="cb2" type="button">NC</button>';
+      cnsHTML += '<button class="cb2" type="button">NA</button>';
+      cnsHTML += '</div>';
+      cnsHTML += '<div id="ncObs-' + i + '-' + k + '" style="display:none;margin-top:4px"><input type="text" placeholder="¿Por qué NC?" style="font-size:11px;padding:4px 6px;min-width:120px;border:1px solid var(--rojo);border-radius:4px;"></div>';
+      cnsHTML += '</td>';
+    }
+
     var tr = document.createElement('tr');
-    tr.innerHTML = '<td>'+(i+1)+'</td><td><input type="text"></td><td><select><option>PQS</option></select></td><td><select><option>10</option></select></td><td><input type="text"></td>' +
-                   '<td><button class="cb2" onclick="this.classList.toggle(\'ac\')">C</button></td>'.repeat(13) +
-                   '<td><input type="date"></td><td><textarea></textarea></td><td><select><option>RECARGA</option></select></td>';
+    tr.innerHTML =
+      '<td style="text-align:center;font-weight:600;color:var(--gm)">' + (i+1) + '</td>' +
+      '<td>' + ubicacionCell + '</td>' +
+      '<td>' + tipoCell + '</td>' +
+      '<td>' + capCell + '</td>' +
+      '<td><input type="text" value="' + (pre.marca || '') + '" style="min-width:90px"></td>' +
+      cnsHTML +
+      '<td><input type="date" style="min-width:130px"></td>' +
+      '<td><textarea style="min-width:140px;min-height:50px;font-size:11px"></textarea></td>' +
+      '<td><select style="min-width:140px">' + srvOpts + '</select></td>';
+
     tbody.appendChild(tr);
+  }
+
+  // Agregar eventos a botones CNS
+  var cnsBtns = tbody.querySelectorAll('.cb2');
+  cnsBtns.forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var parent = this.parentElement;
+      parent.querySelectorAll('.cb2').forEach(function(b) { b.className = 'cb2'; });
+      var btns = parent.querySelectorAll('.cb2');
+      if (this === btns[0]) this.classList.add('ac');
+      else if (this === btns[1]) this.classList.add('anc');
+      else this.classList.add('ana');
+      var td = parent.parentElement;
+      var obsDiv = td.querySelector('div[id^="ncObs"]');
+      if (obsDiv) obsDiv.style.display = this.classList.contains('anc') ? 'block' : 'none';
+    });
+  });
+
+  // Detectar fecha vencida
+  var fechaInputs = tbody.querySelectorAll('input[type="date"]');
+  fechaInputs.forEach(function(inp) {
+    inp.addEventListener('change', function() {
+      if (!this.value) return;
+      var hoy = new Date(); hoy.setHours(0,0,0,0);
+      var fechaRec = new Date(this.value);
+      var tr = this.closest('tr');
+      if (fechaRec < hoy) {
+        var badge = tr.querySelector('.fecha-vencida-badge');
+        if (!badge) {
+          badge = document.createElement('div');
+          badge.className = 'fecha-vencida-badge';
+          badge.style.cssText = 'background:#fdf0ef;color:#c0392b;font-size:10px;font-weight:600;padding:3px 7px;border-radius:4px;margin-top:4px;border:1px solid #f5b7b1;';
+          badge.textContent = '⚠ Fecha vencida — NO OPERATIVO';
+          this.parentElement.appendChild(badge);
+        }
+        tr.dataset.fechaVencida = '1';
+      } else {
+        var badge = tr.querySelector('.fecha-vencida-badge');
+        if (badge) badge.remove();
+        tr.dataset.fechaVencida = '0';
+      }
+    });
+  });
+}
+
+function getVal(btn) {
+  if (btn.classList.contains('ac')) return 'C';
+  if (btn.classList.contains('anc')) return 'NC';
+  if (btn.classList.contains('ana')) return 'NA';
+  return '';
+}
+
+function calcRes() {
+  var rows = document.querySelectorAll('#extBody tr');
+  var allFilled = true;
+  var ncTotal = [];
+  var rowData = [];
+
+  rows.forEach(function(tr, i) {
+    var cells = tr.querySelectorAll('td');
+    var ubic = cells[1].querySelector('select') ? cells[1].querySelector('select').value : cells[1].querySelector('input').value;
+    var tipo = cells[2].querySelector('select').value;
+    var cap = cells[3].querySelector('select').value;
+    var marca = cells[4].querySelector('input').value;
+    var fecha = cells[18].querySelector('input').value;
+    var obs = cells[19].querySelector('textarea').value;
+    var srv = cells[20].querySelector('select').value;
+    var itemVals = [];
+    var rowNCs = [];
+    var ncObs = [];
+
+    for (var k = 0; k < 13; k++) {
+      var btns = cells[5+k].querySelectorAll('.cb2');
+      var active = null;
+      btns.forEach(function(b) { if (b.classList.contains('ac') || b.classList.contains('anc') || b.classList.contains('ana')) active = b; });
+      var v = active ? getVal(active) : '';
+      if (!v) allFilled = false;
+      // Leer obs de NC
+      var obsDiv = document.getElementById('ncObs-' + i + '-' + k);
+      var obsInput = obsDiv ? obsDiv.querySelector('input') : null;
+      var ncObsVal = (v === 'NC' && obsInput) ? obsInput.value.trim() : '';
+      if (v === 'NC') { ncTotal.push({ext: i+1, item: ITEMS[k], obs: ncObsVal}); rowNCs.push(ITEMS[k]); }
+      itemVals.push(v);
+      ncObs.push(ncObsVal);
+    }
+
+    // Verificar fecha vencida
+    var fechaVencida = tr.dataset.fechaVencida === '1';
+    var operativo = rowNCs.length === 0 && !fechaVencida;
+    if (fechaVencida && rowNCs.indexOf('FECHA VENCIDA') < 0) rowNCs.push('FECHA VENCIDA');
+    rowData.push({ubic:ubic, tipo:tipo, cap:cap, marca:marca, fecha:fecha, obs:obs, srv:srv, itemVals:itemVals, ncObs:ncObs, operativo:operativo, rowNCs:rowNCs, fechaVencida:fechaVencida});
+  });
+
+  if (!allFilled) { alert('Por favor completa todos los ítems C/NC/NA antes de continuar.'); return; }
+
+  show('p4'); setS(4);
+  renderRes(ncTotal, rowData);
+}
+
+function renderRes(ncs, rowData) {
+  var area = esChimborazo ? document.getElementById('areaS').value : document.getElementById('areaLibre').value;
+  var nInsp = esChimborazo ? document.getElementById('nInsp').value : document.getElementById('nInspGenerica').value;
+  var fecha = new Date().toLocaleDateString('es-EC');
+  var operativoGlobal = ncs.length === 0;
+
+  var rb = document.getElementById('resBox');
+  rb.className = 'res-box ' + (operativoGlobal ? 'ap' : 'nap');
+  var ncHtml = '';
+  if (!operativoGlobal) {
+    rowData.forEach(function(r, i) {
+      if (!r.operativo) {
+        var obsText = r.obs ? ' — Obs: ' + r.obs : '';
+        ncHtml += '<div style="margin-bottom:6px"><div style="font-weight:600;font-size:12px;color:#962d22">Extintor #' + (i+1) + ' · ' + r.ubic + ' — NO OPERATIVO' + obsText + '</div>';
+        r.rowNCs.forEach(function(nc) {
+          var idxItem = ITEMS.indexOf(nc);
+          var ncObsTxt = (idxItem >= 0 && r.ncObs && r.ncObs[idxItem]) ? ' — ' + r.ncObs[idxItem] : '';
+          ncHtml += '<div class="nc-item" style="margin-left:12px">✗ ' + nc + ncObsTxt + '</div>';
+        });
+        ncHtml += '</div>';
+      }
+    });
+  }
+  rb.innerHTML = '<div class="res-title">' + (operativoGlobal ? '✓ OPERATIVO' : '✗ NO OPERATIVO') + '</div>' +
+    '<div style="font-size:12px;color:var(--gm);font-weight:600;margin-bottom:8px">' + (operativoGlobal ? 'Todos los extintores son operativos' : 'NO CONFORMIDADES — ' + ncs.length + ' encontrada(s)') + '</div>' +
+    (operativoGlobal ? '' : '<div style="margin-top:10px;text-align:left">' + ncHtml + '</div>');
+
+  // PDF
+  var thItems = ITEMS.map(function(it) { return '<th style="font-size:9px;padding:4px 3px;white-space:nowrap">' + it + '</th>'; }).join('');
+  var tRows = rowData.map(function(r, i) {
+    var tdItems = r.itemVals.map(function(v) {
+      return '<td style="text-align:center;font-weight:600;color:' + (v==='C'?'#1a7a4a':v==='NC'?'#C0392B':'#888') + '">' + v + '</td>';
+    }).join('');
+    var resColor = r.operativo ? '#1a7a4a' : '#C0392B';
+    var resBg = r.operativo ? '#eaf7f0' : '#fdf0ef';
+    return '<tr><td style="text-align:center;font-weight:600">' + (i+1) + '</td>' +
+      '<td style="font-size:10px">' + r.ubic + '</td>' +
+      '<td style="text-align:center">' + r.tipo + '</td>' +
+      '<td style="text-align:center">' + r.cap + '</td>' +
+      '<td style="text-align:center">' + r.marca + '</td>' +
+      tdItems +
+      '<td style="font-size:10px;text-align:center">' + (r.fecha||'-') + '</td>' +
+      '<td style="font-size:10px">' + (r.obs||'-') + '</td>' +
+      '<td style="font-size:10px;text-align:center">' + (r.srv||'-') + '</td>' +
+      '<td style="text-align:center;font-weight:700;font-size:10px;background:' + resBg + ';color:' + resColor + ';white-space:nowrap">' + (r.operativo?'OPERATIVO':'NO OPERATIVO') + '</td></tr>';
+  }).join('');
+
+  document.getElementById('pdfBody').innerHTML =
+    '<div style="text-align:center;margin-bottom:12px">' +
+      '<div style="font-size:10px;color:#666;font-family:monospace">UNIÓN CEMENTERA NACIONAL UCEM S.A. · SEGURIDAD INDUSTRIAL</div>' +
+      '<div style="font-size:16px;font-weight:700;letter-spacing:1px;margin:4px 0">INSPECCIÓN DE EXTINTORES</div>' +
+      '<div style="font-size:10px;color:#888">Código: FSI-013 | Versión: 02 | Fecha Aprobación: 27-10-2025</div>' +
+    '</div>' +
+    '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px">' +
+      '<div style="background:#f4f4f4;padding:6px 8px;border-radius:4px"><div style="font-size:9px;color:#666;text-transform:uppercase;font-weight:600">Fecha</div><div style="font-size:11px;font-weight:600">' + fecha + '</div></div>' +
+      '<div style="background:#f4f4f4;padding:6px 8px;border-radius:4px"><div style="font-size:9px;color:#666;text-transform:uppercase;font-weight:600">Nº Inspección</div><div style="font-size:11px;font-weight:600">' + (nInsp||'-') + '</div></div>' +
+      '<div style="background:#f4f4f4;padding:6px 8px;border-radius:4px"><div style="font-size:9px;color:#666;text-transform:uppercase;font-weight:600">Planta</div><div style="font-size:11px;font-weight:600">' + plantaActual + '</div></div>' +
+      '<div style="background:#f4f4f4;padding:6px 8px;border-radius:4px"><div style="font-size:9px;color:#666;text-transform:uppercase;font-weight:600">Área</div><div style="font-size:11px;font-weight:600">' + area + '</div></div>' +
+      '<div style="background:#f4f4f4;padding:6px 8px;border-radius:4px;grid-column:span 2"><div style="font-size:9px;color:#666;text-transform:uppercase;font-weight:600">Responsable</div><div style="font-size:11px;font-weight:600">' + (tActual?tActual.n:'-') + '</div></div>' +
+      '<div style="background:#f4f4f4;padding:6px 8px;border-radius:4px;grid-column:span 2"><div style="font-size:9px;color:#666;text-transform:uppercase;font-weight:600">Cargo</div><div style="font-size:11px;font-weight:600">' + (tActual?tActual.cargo:'-') + '</div></div>' +
+    '</div>' +
+    '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:10px">' +
+      '<thead><tr style="background:#2c2c2c;color:#fff">' +
+        '<th style="padding:5px 6px">#</th><th style="padding:5px 6px">UBICACIÓN</th><th style="padding:5px 6px">TIPO</th><th style="padding:5px 6px">CAP.</th><th style="padding:5px 6px">MARCA</th>' +
+        thItems +
+        '<th style="padding:5px 6px;font-size:9px">PRÓX. RECARGA</th><th style="padding:5px 6px">OBSERVACIONES</th><th style="padding:5px 6px;font-size:9px">TIPO SERVICIO</th><th style="padding:5px 6px;font-size:9px">RESULTADO</th>' +
+      '</tr></thead>' +
+      '<tbody>' + tRows + '</tbody>' +
+    '</table></div>' +
+    '<div style="margin-top:10px;display:flex;justify-content:space-between;font-size:11px;color:#555">' +
+      '<span>Realizado por: <strong>' + (tActual?tActual.n:'-') + '</strong></span>' +
+      '<span style="font-family:monospace">C=Cumple &nbsp; NC=No Cumple &nbsp; NA=No Aplica</span>' +
+    '</div>';
+
+  document.getElementById('pdfWrap').style.display = 'block';
+
+  // Guardar datos en variable global para cuando presione "Guardar registro"
+  window._lastResult = { fecha: fecha, nInsp: nInsp, area: area, rowData: rowData, operativoGlobal: operativoGlobal };
+  document.getElementById('btnGuardar').disabled = false;
+  document.getElementById('btnGuardar').textContent = '💾 Guardar registro';
+  document.getElementById('btnGuardar').style.background = '#1a7a4a';
+}
+
+function guardarRegistro() {
+  var d = window._lastResult;
+  if (!d) { alert('Primero genera un resultado.'); return; }
+
+  var btn = document.getElementById('btnGuardar');
+  btn.disabled = true;
+  btn.textContent = '⏳ Guardando...';
+
+  var ahora = new Date();
+  var fechaGuardado = ahora.toLocaleDateString('es-EC') + ' ' + ahora.toLocaleTimeString('es-EC', {hour:'2-digit',minute:'2-digit'});
+
+  var REGISTROS = JSON.parse(localStorage.getItem('ucem_registros') || '[]');
+
+  var esEdicion = (_editIndex !== null && _editIndex !== undefined);
+  var rowNum = esEdicion && REGISTROS[_editIndex] ? (REGISTROS[_editIndex].sheetRow || null) : null;
+
+  if (esEdicion) {
+    // Edición — actualizar registro existente
+    var fechaCreacion = REGISTROS[_editIndex].fechaCreacion || REGISTROS[_editIndex].fecha;
+    var planta = plantaActual || 'Planta Chimborazo';
+  var reg = {
+      id: REGISTROS[_editIndex].id,
+      planta: planta,
+      fecha: d.fecha,
+      fechaCreacion: fechaCreacion,
+      fechaActualizacion: fechaGuardado,
+      nInsp: d.nInsp||'-', area: d.area,
+      responsable: tActual ? tActual.n : '-',
+      cargo: tActual ? tActual.cargo : '-',
+      operativoGlobal: d.operativoGlobal,
+      rowData: d.rowData,
+      trabajadorCodigo: tActual ? tActual.c : ''
+    };
+    REGISTROS[_editIndex] = reg;
+    _editIndex = null;
+  } else {
+    // Nuevo registro
+    var reg = {
+      id: Date.now(),
+      planta: plantaActual || 'Planta Chimborazo',
+      fecha: d.fecha,
+      fechaCreacion: fechaGuardado,
+      fechaActualizacion: null,
+      nInsp: d.nInsp||'-', area: d.area,
+      responsable: tActual ? tActual.n : '-',
+      cargo: tActual ? tActual.cargo : '-',
+      operativoGlobal: d.operativoGlobal,
+      rowData: d.rowData,
+      trabajadorCodigo: tActual ? tActual.c : ''
+    };
+    REGISTROS.unshift(reg);
+  }
+  localStorage.setItem('ucem_registros', JSON.stringify(REGISTROS));
+
+  // Guardar en Sheets
+  guardarEnSheets(d.fecha, d.nInsp, d.area, d.rowData, fechaGuardado, esEdicion, rowNum);
+
+  btn.textContent = '✓ Guardado — ' + fechaGuardado;
+  btn.style.background = '#0f6e56';
+  window._lastResult = null;
+}
+
+function guardarEnSheets(fecha, nInsp, area, rowData, fechaGuardado, esEdicion, rowNum) {
+  var payload = {
+    fechaGuardado: fechaGuardado,
+    nInsp: nInsp,
+    area: area,
+    planta: plantaActual || 'Planta Chimborazo',
+    accion: esEdicion ? 'editar' : 'nuevo',
+    rowNum: rowNum || null,
+    responsable: tActual ? tActual.n : '-',
+    cargo: tActual ? tActual.cargo : '-',
+    extintores: rowData.map(function(r) {
+      return { ubic: r.ubic, tipo: r.tipo, cap: r.cap, marca: r.marca,
+        itemVals: r.itemVals, ncObs: r.ncObs || [], fecha: r.fecha, obs: r.obs, srv: r.srv,
+        operativo: r.operativo };
+    })
+  };
+  fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) })
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+      if (data.status === 'ok') console.log('✓ Guardado en Sheets');
+      else console.error('Error Sheets:', data.msg);
+    })
+    .catch(function(err) { console.error('Error conexión:', err); });
+}
+
+function goRegistros() { renderRegistros(); show('pReg'); }
+
+function renderRegistros() {
+  var REGISTROS = JSON.parse(localStorage.getItem('ucem_registros') || '[]');
+  var div = document.getElementById('regBody');
+  if (REGISTROS.length === 0) {
+    div.innerHTML = '<div style="text-align:center;color:var(--gm);padding:20px;font-size:13px;">No hay inspecciones registradas aún.</div>';
+    return;
+  }
+  div.innerHTML = REGISTROS.map(function(r, i) {
+    var color = r.operativoGlobal ? '#1a7a4a' : '#C0392B';
+    var bg = r.operativoGlobal ? '#eaf7f0' : '#fdf0ef';
+    var txt = r.operativoGlobal ? 'OPERATIVO' : 'NO OPERATIVO';
+    return '<div style="border:1px solid var(--bd);border-radius:6px;padding:12px;margin-bottom:8px;background:#fff">' +
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:6px">' +
+        '<div>' +
+          '<div style="font-weight:600;font-size:13px">' + r.area + '</div>' +
+          '<div style="font-size:11px;color:var(--gm);margin-top:2px">' + (r.planta||'Planta Chimborazo') + ' · ' + r.fecha + ' · Nº' + r.nInsp + ' · ' + r.responsable + '</div>' +
+          '<div style="font-size:10px;color:var(--gm)">Guardado: ' + (r.fechaCreacion||r.fecha) + (r.fechaActualizacion ? ' · <span style="color:#1a5276">Actualizado: ' + r.fechaActualizacion + '</span>' : '') + '</div>' +
+          '<div style="font-size:11px;color:var(--gm)">' + r.rowData.length + ' extintor(es)</div>' +
+        '</div>' +
+        '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">' +
+          '<span style="background:' + bg + ';color:' + color + ';font-weight:700;font-size:11px;padding:3px 10px;border-radius:4px;border:1px solid ' + color + '">' + txt + '</span>' +
+          '<button onclick="editarReg(' + i + ')" style="padding:5px 10px;border-radius:4px;border:1px solid #c8e6c9;background:#f1f8f1;color:#1a7a4a;font-size:11px;font-weight:600;cursor:pointer">✎ Editar</button>' +
+          '<button onclick="duplicarReg(' + i + ')" style="padding:5px 10px;border-radius:4px;border:1px solid var(--bd);background:#f0f7ff;color:var(--azul);font-size:11px;font-weight:600;cursor:pointer">⧉ Duplicar</button>' +
+          '<button onclick="eliminarReg(' + i + ')" style="padding:5px 10px;border-radius:4px;border:1px solid #fcc;background:#fff5f5;color:#c0392b;font-size:11px;font-weight:600;cursor:pointer">✕ Eliminar</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function editarReg(i) {
+  var REGISTROS = JSON.parse(localStorage.getItem('ucem_registros') || '[]');
+  var r = REGISTROS[i];
+
+  // Restaurar planta
+  plantaActual = r.planta || 'Planta Chimborazo';
+  esChimborazo = (plantaActual === 'Planta Chimborazo');
+  document.getElementById('plantaSelect').value = plantaActual;
+  document.getElementById('hPlantaNombre').textContent = plantaActual;
+  document.getElementById('plantaBarNombre').textContent = plantaActual;
+  document.getElementById('p1Chimborazo').classList.toggle('hidden', !esChimborazo);
+  document.getElementById('p1Generica').classList.toggle('hidden', esChimborazo);
+  document.getElementById('p2Chimborazo').classList.toggle('hidden', !esChimborazo);
+  document.getElementById('p2Generica').classList.toggle('hidden', esChimborazo);
+
+  if (esChimborazo) {
+    var t = null;
+    for (var j = 0; j < TRABAJADORES.length; j++) {
+      if (TRABAJADORES[j].c === r.trabajadorCodigo) { t = TRABAJADORES[j]; break; }
+    }
+    if (t) {
+      tActual = t;
+      document.getElementById('codInput').value = t.c;
+      document.getElementById('tNom').textContent = t.n;
+      document.getElementById('tDet').textContent = t.cargo + ' · Planta ' + t.p;
+      document.getElementById('tCard').classList.remove('hidden');
+    }
+    document.getElementById('nInsp').value = r.nInsp;
+    document.getElementById('areaS').value = r.area;
+  } else {
+    tActual = { n: r.responsable, cargo: r.cargo, c: '', p: plantaActual };
+    document.getElementById('nombreLibre').value = r.responsable;
+    document.getElementById('cargoLibre').value = r.cargo;
+    document.getElementById('nInspGenerica').value = r.nInsp;
+    document.getElementById('areaLibre').value = r.area;
+  }
+
+  document.getElementById('numExt').value = r.rowData.length;
+  _editIndex = i;
+  buildTable(r.area, r.rowData.length);
+  setTimeout(function() {
+    var rows = document.querySelectorAll('#extBody tr');
+    rows.forEach(function(tr, idx) {
+      var rd = r.rowData[idx];
+      if (!rd) return;
+      var cells = tr.querySelectorAll('td');
+      // ubicacion: input o select según planta
+      var ubEl = cells[1].querySelector('select') || cells[1].querySelector('input');
+      if (ubEl) ubEl.value = rd.ubic;
+      var tipoSel = cells[2].querySelector('select'); if (tipoSel) tipoSel.value = rd.tipo;
+      var capSel = cells[3].querySelector('select'); if (capSel) capSel.value = rd.cap.replace(' Lbs','').replace(' lb','').trim();
+      var marcaInp = cells[4].querySelector('input'); if (marcaInp) marcaInp.value = rd.marca;
+      rd.itemVals.forEach(function(v, k) {
+        var btns = cells[5+k].querySelectorAll('.cb2');
+        btns.forEach(function(b) { b.className = 'cb2'; });
+        if (v==='C') btns[0].classList.add('ac');
+        else if (v==='NC') btns[1].classList.add('anc');
+        else if (v==='NA') btns[2].classList.add('ana');
+      });
+      var fechaInp = cells[18].querySelector('input'); if (fechaInp) fechaInp.value = rd.fecha || '';
+      var obsTA = cells[19].querySelector('textarea'); if (obsTA) obsTA.value = rd.obs || '';
+      var srvSel = cells[20].querySelector('select'); if (srvSel) srvSel.value = rd.srv || '';
+    });
+  }, 100);
+  show('p3'); setS(3);
+}
+
+function duplicarReg(i) {
+  window._dupIndex = i;
+  var REGISTROS = JSON.parse(localStorage.getItem('ucem_registros') || '[]');
+  var r = REGISTROS[i];
+  document.getElementById('dupNInsp').value = r.nInsp + ' (copia)';
+  document.getElementById('dupArea').value = r.area;
+  document.getElementById('modalDuplicar').style.display = 'flex';
+}
+
+function confirmarDuplicar() {
+  var i = window._dupIndex;
+  var nInspNuevo = document.getElementById('dupNInsp').value.trim();
+  var areaNueva = document.getElementById('dupArea').value;
+  if (!nInspNuevo || !areaNueva) { alert('Por favor completa el Nº inspección y el área.'); return; }
+  var REGISTROS = JSON.parse(localStorage.getItem('ucem_registros') || '[]');
+  var copia = JSON.parse(JSON.stringify(REGISTROS[i]));
+  copia.id = Date.now();
+  copia.fecha = new Date().toLocaleDateString('es-EC');
+  copia.nInsp = nInspNuevo;
+  copia.area = areaNueva;
+  copia.fechaCreacion = null;
+  copia.fechaActualizacion = null;
+  // preservar planta del original
+  copia.planta = REGISTROS[i].planta || 'Planta Chimborazo';
+  REGISTROS.unshift(copia);
+  localStorage.setItem('ucem_registros', JSON.stringify(REGISTROS));
+  document.getElementById('modalDuplicar').style.display = 'none';
+  renderRegistros();
+}
+
+function eliminarReg(i) {
+  if (!confirm('¿Eliminar este registro?')) return;
+  var REGISTROS = JSON.parse(localStorage.getItem('ucem_registros') || '[]');
+  REGISTROS.splice(i, 1);
+  localStorage.setItem('ucem_registros', JSON.stringify(REGISTROS));
+  renderRegistros();
+}
+
+function toggleNuevaUbicFila(i) {
+  var div = document.getElementById('nuevaUbicFila-' + i);
+  div.style.display = div.style.display === 'none' ? 'block' : 'none';
+  if (div.style.display === 'block') document.getElementById('nuevaUbicInput-' + i).focus();
+}
+
+function agregarUbicFila(i) {
+  var input = document.getElementById('nuevaUbicInput-' + i);
+  var val = input.value.trim();
+  if (!val) { alert('Escribe la ubicación.'); return; }
+  var sel = document.getElementById('ubicSel-' + i);
+  var opt = document.createElement('option');
+  opt.value = val; opt.textContent = val + '  ★'; opt.selected = true;
+  sel.appendChild(opt);
+  var area = document.getElementById('areaS').value;
+  var custom = JSON.parse(localStorage.getItem('ucem_custom_areas') || '{}');
+  if (!custom[area]) custom[area] = [];
+  custom[area].push({ubicacion: val, tipo: '', capacidad: '', marca: ''});
+  localStorage.setItem('ucem_custom_areas', JSON.stringify(custom));
+  input.value = '';
+  document.getElementById('nuevaUbicFila-' + i).style.display = 'none';
+}
+
+function toggleGestionAreas() {
+  var div = document.getElementById('modalGestionAreas');
+  div.style.display = div.style.display === 'none' ? 'block' : 'none';
+  if (div.style.display === 'block') renderAreasCustom();
+}
+
+function renderAreasCustom() {
+  var custom = JSON.parse(localStorage.getItem('ucem_custom_areas') || '{}');
+  var div = document.getElementById('listaAreasCustom');
+  var areas = Object.keys(custom);
+  if (areas.length === 0) {
+    div.innerHTML = '<div style="font-size:12px;color:var(--gm);text-align:center;padding:8px">No hay áreas ni ubicaciones agregadas manualmente.</div>';
+    return;
+  }
+  div.innerHTML = areas.map(function(area) {
+    var ubics = custom[area] || [];
+    var ubicsHTML = ubics.map(function(u, i) {
+      return '<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 8px;background:#fff;border-radius:4px;margin-bottom:3px;border:1px solid #fde8e6">' +
+        '<span style="font-size:11px">↳ ' + u.ubicacion + '</span>' +
+        '<button onclick="eliminarUbicDeAreaCustom(\'' + area + '\',' + i + ')" style="padding:2px 8px;border-radius:3px;border:1px solid #fcc;background:#fff5f5;color:#c0392b;font-size:10px;font-weight:600;cursor:pointer">✕</button>' +
+      '</div>';
+    }).join('');
+    return '<div style="margin-bottom:10px;background:#fdf5f5;border-radius:6px;padding:8px;border:1px solid #f5b7b1">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">' +
+        '<span style="font-size:12px;font-weight:600;color:var(--rojo)">★ ' + area + '</span>' +
+        '<button onclick="eliminarAreaCustomCompleta(\'' + area + '\')" style="padding:3px 8px;border-radius:4px;border:1px solid #c0392b;background:#c0392b;color:#fff;font-size:10px;font-weight:600;cursor:pointer">Borrar área completa</button>' +
+      '</div>' + ubicsHTML + '</div>';
+  }).join('');
+}
+
+function eliminarAreaCustomCompleta(area) {
+  if (!confirm('¿Borrar el área "' + area + '" y todas sus ubicaciones?')) return;
+  var custom = JSON.parse(localStorage.getItem('ucem_custom_areas') || '{}');
+  delete custom[area];
+  localStorage.setItem('ucem_custom_areas', JSON.stringify(custom));
+  cargarAreas(); renderAreasCustom();
+}
+
+function eliminarUbicDeAreaCustom(area, idx) {
+  if (!confirm('¿Borrar esta ubicación?')) return;
+  var custom = JSON.parse(localStorage.getItem('ucem_custom_areas') || '{}');
+  custom[area].splice(idx, 1);
+  if (custom[area].length === 0) delete custom[area];
+  localStorage.setItem('ucem_custom_areas', JSON.stringify(custom));
+  cargarAreas(); renderAreasCustom();
+}
+
+function toggleGestionarUbics() {
+  var div = document.getElementById('gestionUbics');
+  div.style.display = div.style.display === 'none' ? 'block' : 'none';
+  if (div.style.display === 'block') renderUbicsCustom();
+}
+
+function renderUbicsCustom() {
+  var area = document.getElementById('areaS').value;
+  var custom = JSON.parse(localStorage.getItem('ucem_custom_areas') || '{}');
+  var lista = custom[area] || [];
+  var div = document.getElementById('listaUbicsCustom');
+  if (lista.length === 0) {
+    div.innerHTML = '<div style="font-size:12px;color:var(--gm);text-align:center;padding:8px">No hay ubicaciones personalizadas en esta área.</div>';
+    return;
+  }
+  div.innerHTML = lista.map(function(u, i) {
+    return '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 8px;background:#fff;border-radius:4px;margin-bottom:5px;border:1px solid #dde8f5">' +
+      '<span style="font-size:12px;font-weight:500">★ ' + u.ubicacion + '</span>' +
+      '<button onclick="eliminarUbicCustom(\'' + area + '\',' + i + ')" style="padding:3px 10px;border-radius:4px;border:1px solid #fcc;background:#fff5f5;color:#c0392b;font-size:11px;font-weight:600;cursor:pointer">✕ Borrar</button>' +
+    '</div>';
+  }).join('');
+}
+
+function eliminarUbicCustom(area, idx) {
+  if (!confirm('¿Borrar esta ubicación?')) return;
+  var custom = JSON.parse(localStorage.getItem('ucem_custom_areas') || '{}');
+  custom[area].splice(idx, 1);
+  if (custom[area].length === 0) delete custom[area];
+  localStorage.setItem('ucem_custom_areas', JSON.stringify(custom));
+  var n = document.querySelectorAll('#extBody tr').length;
+  buildTable(area, n);
+  renderUbicsCustom();
+}
+
+function show(id) {
+  ['p0','p1','p2','p3','p4','pReg'].forEach(function(p) { document.getElementById(p).classList.add('hidden'); });
+  document.getElementById(id).classList.remove('hidden');
+}
+
+function setS(n) {
+  for (var i = 0; i <= 4; i++) {
+    var el = document.getElementById('s' + i);
+    if (!el) continue;
+    el.className = 'step' + (i < n ? ' done' : i === n ? ' active' : '');
   }
 }
 
-function calcRes() { show('p4'); setS(4); renderRes(); }
-
-function renderRes() {
-  document.getElementById('resBox').innerHTML = '<div class="res-box ap"><div class="res-title">INSCRIPCIÓN COMPLETADA</div></div>';
+function resetApp() {
+  tActual = null; _editIndex = null;
+  plantaActual = ''; esChimborazo = false;
+  document.getElementById('plantaSelect').value = '';
+  document.getElementById('codInput').value = '';
+  document.getElementById('nInsp').value = '';
+  document.getElementById('nombreLibre').value = '';
+  document.getElementById('cargoLibre').value = '';
+  document.getElementById('nInspGenerica').value = '';
+  document.getElementById('areaLibre').value = '';
+  document.getElementById('hPlantaNombre').textContent = 'Seleccione planta';
+  document.getElementById('plantaBarNombre').textContent = 'Seleccione una planta';
+  document.getElementById('tCard').classList.add('hidden');
+  document.getElementById('areaS').value = '';
+  document.getElementById('numExt').value = '1';
+  document.getElementById('extBody').innerHTML = '';
+  document.getElementById('pdfWrap').style.display = 'none';
+  document.getElementById('resBox').innerHTML = '';
+  goP0();
 }
-
-function guardarRegistro() { alert('Enviando a: ' + APPS_SCRIPT_URL); }
-
-function resetApp() { location.reload(); }
-
-function goRegistros() { show('pReg'); }
-
-// ARRANQUE DE EMERGENCIA FINAL[cite: 1]
-setTimeout(function() {
-    if (document.getElementById('p0').classList.contains('hidden')) {
-        goP0();
-    }
-}, 800);
 </script>
 </body>
 </html>
