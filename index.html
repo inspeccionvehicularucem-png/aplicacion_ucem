@@ -340,6 +340,12 @@ table.ext td input,table.ext td select{padding:5px 7px;font-size:12px;border-rad
       <div><div class="pn">Inspección SST — Áreas</div><div class="ps">RSI-CO-01-GL · Seguridad y Salud en el Trabajo</div></div>
     </div>
 
+    <!-- Banner modo edición -->
+    <div id="sst-edit-banner" style="display:none;background:#fff3cd;border:1.5px solid #f39c12;border-radius:8px;padding:10px 14px;margin-bottom:10px;display:none;align-items:center;justify-content:space-between;gap:8px;">
+      <span style="font-size:12px;font-weight:600;color:#856404;">✎ Modo edición — modifica los campos y presiona 💾 Finalizar SST para guardar los cambios</span>
+      <button onclick="sstCancelarEdicion()" style="padding:5px 12px;border-radius:4px;border:1px solid #f39c12;background:#fff;color:#856404;font-size:11px;font-weight:600;cursor:pointer;">✕ Cancelar</button>
+    </div>
+
     <!-- SST Formulario -->
     <div id="sst-form" class="card">
       <div class="ch"><span class="n" style="background:var(--azul)">1</span> Datos de la inspección</div>
@@ -422,7 +428,7 @@ table.ext td input,table.ext td select{padding:5px 7px;font-size:12px;border-rad
      =================================================== -->
 <script>
 // ========== DATOS EXTINTORES ==========
-var EXT_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwhy3GZuuzmk2b-RePMEPIg1nIye6KaPVrvnz2vuue0y2jzhwl12ZnGhflhBOcY_aW0xA/exec';
+var EXT_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw5bNEb_Jvo1Ny9Xhd2zheDI-ehl6GUZY_INFxKnXVvZfVUmDGjmT15GAb8UgU6YD-D-Q/exec';
 var EXT_ITEMS = ['PINTURA','GOLPES','AUTOADHESIVO FECHA/MTTO','MANIJA TRANSPORTE','MANIJA DISPARO','PRESIÓN','MANÓMETRO','BOQUILLA','MANGUERA','RING/ARO SEGURIDAD','CORNETA','SEÑALIZACIÓN','SOPORTE/COLGAR/RUEDAS'];
 var EXT_TIPOS = ['PQS','CO2','Tipo K'];
 var EXT_CAPS = ['2.5','5','10','15','20','25','50','100','125','150'];
@@ -1088,7 +1094,7 @@ function extEliminarUbicCustom(area,idx){
 }
 
 // ========== SST ==========
-var SST_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzqTdLBICDs0SUYhFpSydao3UTxQy1byVDwwpoQmuYXLntxlb7AW6GMN87N5meJ-rUnSA/exec'; // ← pega tu URL aquí
+var SST_APPS_SCRIPT_URL = 'TU_URL_APPS_SCRIPT_SST_AQUI'; // ← pega tu URL aquí
 
 var ITEMS_SST=[
   {id:"1",t:"PELIGROS FÍSICOS",isCat:true},
@@ -1165,6 +1171,7 @@ var ITEMS_SST=[
 
 var respuestasSST={};
 var SST_TOTAL_ITEMS=ITEMS_SST.filter(function(i){return !i.isCat;}).length;
+var sst_editIndex=null; // índice del registro que se está editando
 
 function renderSST(){
   var container=document.getElementById('sst-lista');
@@ -1220,22 +1227,31 @@ function guardarSST(){
   var codigo=document.getElementById('sst-codigo').value.trim();
   if(!planta||!localidad||!area){return alert('⚠️ Llene Planta, Localidad y Área antes de finalizar.');}
   var ahora=new Date();
-  var fechaGuardado=ahora.toLocaleDateString('es-EC')+' '+ahora.toLocaleTimeString('es-EC',{hour:'2-digit',minute:'2-digit'});
+  var fechaActualizacion=ahora.toLocaleDateString('es-EC')+' '+ahora.toLocaleTimeString('es-EC',{hour:'2-digit',minute:'2-digit'});
   var porcentaje=document.getElementById('sst-percent-txt').textContent;
   var SST_REG=JSON.parse(localStorage.getItem('ucem_sst_registros')||'[]');
+  var esEdicion=(sst_editIndex!==null&&sst_editIndex!==undefined);
+  var rowNum=esEdicion&&SST_REG[sst_editIndex]?(SST_REG[sst_editIndex].sheetRow||null):null;
+
   var reg={
-    id:Date.now(),
+    id:esEdicion?SST_REG[sst_editIndex].id:Date.now(),
     planta:planta, localidad:localidad, area:area,
     inspector:inspector, codigo:codigo,
     fecha:document.getElementById('sst-fecha').value,
-    fechaCreacion:fechaGuardado,
+    fechaCreacion:esEdicion?SST_REG[sst_editIndex].fechaCreacion:fechaActualizacion,
+    fechaActualizacion:esEdicion?fechaActualizacion:null,
+    sheetRow:rowNum,
     porcentaje:porcentaje,
     respuestas:JSON.parse(JSON.stringify(respuestasSST))
   };
-  SST_REG.unshift(reg);
+
+  if(esEdicion){ SST_REG[sst_editIndex]=reg; sst_editIndex=null; }
+  else { SST_REG.unshift(reg); }
+
   localStorage.setItem('ucem_sst_registros',JSON.stringify(SST_REG));
-  sstGuardarEnSheets(reg);
-  alert('✅ Inspección SST guardada.\nCumplimiento: '+porcentaje);
+  sstGuardarEnSheets(reg, esEdicion, rowNum);
+  alert(esEdicion?'✅ Registro SST actualizado.\nCumplimiento: '+porcentaje:'✅ Inspección SST guardada.\nCumplimiento: '+porcentaje);
+
   // Limpiar formulario
   respuestasSST={};
   document.getElementById('sst-planta').value='';
@@ -1249,14 +1265,28 @@ function guardarSST(){
   mostrarMenu();
 }
 
-function sstGuardarEnSheets(reg){
+function sstGuardarEnSheets(reg, esEdicion, rowNum){
   if(!SST_APPS_SCRIPT_URL||SST_APPS_SCRIPT_URL==='TU_URL_APPS_SCRIPT_SST_AQUI'){
     console.warn('⚠️ URL de Apps Script SST no configurada.');
     return;
   }
-  fetch(SST_APPS_SCRIPT_URL,{method:'POST',body:JSON.stringify(reg)})
+  var payload=Object.assign({},reg,{
+    accion: esEdicion?'editar':'nuevo',
+    rowNum: rowNum||null
+  });
+  fetch(SST_APPS_SCRIPT_URL,{method:'POST',body:JSON.stringify(payload)})
     .then(function(res){return res.json();})
-    .then(function(data){if(data.status==='ok')console.log('✓ SST guardado en Sheets');else console.error('Error SST:',data.msg);})
+    .then(function(data){
+      if(data.status==='ok'){
+        console.log('✓ SST guardado en Sheets');
+        // Si es nuevo, guardar el número de fila que devuelve el script
+        if(!esEdicion && data.rowNum){
+          var SST_REG=JSON.parse(localStorage.getItem('ucem_sst_registros')||'[]');
+          var idx=SST_REG.findIndex(function(r){return r.id===reg.id;});
+          if(idx>=0){ SST_REG[idx].sheetRow=data.rowNum; localStorage.setItem('ucem_sst_registros',JSON.stringify(SST_REG)); }
+        }
+      } else { console.error('Error SST:',data.msg); }
+    })
     .catch(function(err){console.error('Error conexión SST:',err);});
 }
 
@@ -1285,21 +1315,63 @@ function sstRenderRegistros(){
     var color=pct>=85?'#1a7a4a':pct>=50?'#f39c12':'#C0392B';
     var bg=pct>=85?'#eaf7f0':pct>=50?'#fef9e7':'#fdf0ef';
     var trabajador=(r.inspector||'-')+(r.codigo?' ('+r.codigo+')':'');
+    var fechaInfo='Guardado: '+r.fechaCreacion+(r.fechaActualizacion?' · <span style="color:var(--azul)">Actualizado: '+r.fechaActualizacion+'</span>':'');
     return '<div class="reg-card">'+
       '<div class="reg-top">'+
         '<div>'+
           '<div style="font-weight:600;font-size:13px">'+r.area+'</div>'+
           '<div style="font-size:11px;color:var(--gm);margin-top:2px">'+r.planta+' · '+r.localidad+' · '+r.fecha+'</div>'+
           '<div style="font-size:11px;color:var(--gm)">Trabajador: '+trabajador+'</div>'+
-          '<div style="font-size:10px;color:var(--gm)">Guardado: '+r.fechaCreacion+'</div>'+
+          '<div style="font-size:10px;color:var(--gm)">'+fechaInfo+'</div>'+
         '</div>'+
         '<div class="reg-actions">'+
           '<span style="background:'+bg+';color:'+color+';font-weight:700;font-size:14px;padding:5px 12px;border-radius:4px;border:1px solid '+color+'">'+r.porcentaje+'</span>'+
+          '<button onclick="sstEditarReg('+i+')" style="border:1px solid #c8e6c9;background:#f1f8f1;color:#1a7a4a;">✎ Editar</button>'+
           '<button onclick="sstEliminarReg('+i+')" style="border:1px solid #fcc;background:#fff5f5;color:#c0392b;">✕ Eliminar</button>'+
         '</div>'+
       '</div>'+
     '</div>';
   }).join('');
+}
+
+function sstEditarReg(i){
+  var SST_REG=JSON.parse(localStorage.getItem('ucem_sst_registros')||'[]');
+  var r=SST_REG[i];
+  sst_editIndex=i;
+  // Rellenar formulario con los datos del registro
+  document.getElementById('sst-planta').value=r.planta||'';
+  document.getElementById('sst-loc').value=r.localidad||'';
+  document.getElementById('sst-area').value=r.area||'';
+  document.getElementById('sst-inspector').value=r.inspector||'';
+  document.getElementById('sst-codigo').value=r.codigo||'';
+  document.getElementById('sst-fecha').value=r.fecha||'';
+  // Restaurar respuestas
+  respuestasSST=JSON.parse(JSON.stringify(r.respuestas||{}));
+  // Volver al formulario y re-renderizar ítems con marcas
+  sstVolverFormulario();
+  renderSST();
+  // Marcar botones activos según respuestas guardadas
+  setTimeout(function(){
+    ITEMS_SST.forEach(function(item){
+      if(item.isCat) return;
+      var v=respuestasSST[item.id];
+      if(v===undefined||v===null) return;
+      var rows=document.querySelectorAll('#sst-lista .item-row');
+      var itemsNocat=ITEMS_SST.filter(function(x){return !x.isCat;});
+      var idx=itemsNocat.findIndex(function(x){return x.id===item.id;});
+      if(idx<0||!rows[idx]) return;
+      var btns=rows[idx].querySelectorAll('.b-chk');
+      btns.forEach(function(b){b.classList.remove('active');});
+      if(v===1&&!String(v).includes('na'))      btns[0].classList.add('active'); // CUMPLE
+      else if(v===0.5)  btns[1].classList.add('active'); // PARCIAL
+      else if(v===0)    btns[2].classList.add('active'); // NO CUMPLE
+      else if(v==='na') btns[3].classList.add('active'); // N/A
+    });
+    sstActualizarPorcentaje();
+    // Banner de edición
+    var banner=document.getElementById('sst-edit-banner');
+    if(banner) banner.style.display='block';
+  },100);
 }
 
 function sstEliminarReg(i){
@@ -1308,6 +1380,20 @@ function sstEliminarReg(i){
   SST_REG.splice(i,1);
   localStorage.setItem('ucem_sst_registros',JSON.stringify(SST_REG));
   sstRenderRegistros();
+}
+
+function sstCancelarEdicion(){
+  sst_editIndex=null;
+  respuestasSST={};
+  document.getElementById('sst-planta').value='';
+  document.getElementById('sst-loc').value='';
+  document.getElementById('sst-area').value='';
+  document.getElementById('sst-inspector').value='';
+  document.getElementById('sst-codigo').value='';
+  document.getElementById('sst-fecha').valueAsDate=new Date();
+  document.getElementById('sst-edit-banner').style.display='none';
+  renderSST();
+  sstActualizarPorcentaje();
 }
 
 // ========== INIT ==========
