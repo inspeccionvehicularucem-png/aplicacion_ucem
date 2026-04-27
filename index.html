@@ -469,8 +469,17 @@ table.ext td input,table.ext td select{padding:5px 7px;font-size:12px;border-rad
           <input type="text" id="lam-area" placeholder="Ej: Pasillo principal, Bodega...">
         </div>
         <div class="field">
+          <label>Código del Técnico</label>
+          <input type="text" id="lam-cod-input" placeholder="Ej: 23452">
+          <div id="lam-tCard" style="display:none;background:#eef5fd;border:1px solid #b3d4f5;border-radius:6px;padding:10px;margin-top:6px;">
+            <div id="lam-tNom" style="font-size:13px;font-weight:600;color:var(--azul);"></div>
+            <div id="lam-tDet" style="font-size:11px;color:var(--gm);margin-top:2px;"></div>
+          </div>
+          <div id="lam-tErr" style="display:none;color:var(--rojo);font-size:12px;margin-top:4px;">Código no encontrado</div>
+        </div>
+        <div class="field">
           <label>Nombre del técnico de Seguridad Industrial</label>
-          <input type="text" id="lam-tecnico" placeholder="Nombre completo">
+          <input type="text" id="lam-tecnico" placeholder="Se autocompleta con el código">
         </div>
         <div class="field">
           <label>Código de la lámpara</label>
@@ -1732,8 +1741,29 @@ function sstCancelarEdicion(){
   sstActualizarPorcentaje();
 }
 
+function lamBuscarTecnico(v){
+  var t=null;
+  for(var i=0;i<EXT_TRABAJADORES.length;i++){
+    if(EXT_TRABAJADORES[i].c===v.trim()){t=EXT_TRABAJADORES[i];break;}
+  }
+  var card=document.getElementById('lam-tCard');
+  var err=document.getElementById('lam-tErr');
+  var nomInput=document.getElementById('lam-tecnico');
+  if(t){
+    document.getElementById('lam-tNom').textContent=t.n;
+    document.getElementById('lam-tDet').textContent=t.cargo+' · Planta '+t.p;
+    card.style.display='block'; err.style.display='none';
+    nomInput.value=t.n;
+  } else {
+    card.style.display='none';
+    nomInput.value='';
+    if(v.length>=3) err.style.display='block';
+    else err.style.display='none';
+  }
+}
+
 // ========== LÁMPARAS DE EMERGENCIA ==========
-var LAM_APPS_SCRIPT_URL = 'TU_URL_APPS_SCRIPT_LAMPARAS_AQUI';
+var LAM_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwI_gAWJVAXpxM53Jb_FLLy6caxaLjitwXEIzCZc2LPd44f_vpW36TzImU_d3au3xRR/exec';
 
 var LAM_ITEMS = [
   {id:'L1', t:'¿La lámpara está limpia y sin daños visibles?'},
@@ -1874,6 +1904,8 @@ function guardarLam(){
 
   // Limpiar
   respuestasLam = {}; estadoLam = '';
+  document.getElementById('lam-cod-input').value='';
+  document.getElementById('lam-tCard').style.display='none';
   document.getElementById('lam-planta').value='';
   document.getElementById('lam-area').value='';
   document.getElementById('lam-tecnico').value='';
@@ -2029,6 +2061,8 @@ function lamEditarReg(i){
 function lamCancelarEdicion(){
   lam_editIndex = null;
   respuestasLam = {}; estadoLam = '';
+  document.getElementById('lam-cod-input').value='';
+  document.getElementById('lam-tCard').style.display='none';
   document.getElementById('lam-planta').value='';
   document.getElementById('lam-area').value='';
   document.getElementById('lam-tecnico').value='';
@@ -2088,6 +2122,8 @@ function guardarLam(){
   alert('✅ Inspección de lámpara guardada.');
   // Limpiar
   respuestasLam = {}; estadoLam = '';
+  document.getElementById('lam-cod-input').value='';
+  document.getElementById('lam-tCard').style.display='none';
   document.getElementById('lam-planta').value='';
   document.getElementById('lam-area').value='';
   document.getElementById('lam-tecnico').value='';
@@ -2099,7 +2135,7 @@ function guardarLam(){
 }
 
 function lamGuardarEnSheets(reg){
-  if(!LAM_APPS_SCRIPT_URL||LAM_APPS_SCRIPT_URL==='https://script.google.com/macros/s/AKfycbwI_gAWJVAXpxM53Jb_FLLy6caxaLjitwXEIzCZc2LPd44f_vpW36TzImU_d3au3xRR/exec'){
+  if(!LAM_APPS_SCRIPT_URL||LAM_APPS_SCRIPT_URL==='TU_URL_APPS_SCRIPT_LAMPARAS_AQUI'){
     console.warn('⚠️ URL Apps Script Lámparas no configurada.');
     return;
   }
@@ -2213,6 +2249,7 @@ function lamEliminarReg(i){
 window.onload=function(){
   // Extintores
   document.getElementById('ext-codInput').addEventListener('input',function(){extBuscar(this.value);});
+  document.getElementById('lam-cod-input').addEventListener('input',function(){lamBuscarTecnico(this.value);});
   document.getElementById('ext-btnP1').addEventListener('click',extGoP1);
   document.getElementById('ext-btnP2').addEventListener('click',extGoP2);
   document.getElementById('ext-btnP3').addEventListener('click',extGoP3);
