@@ -485,7 +485,7 @@ table.ext td input,table.ext td select{padding:5px 7px;font-size:12px;border-rad
           <label>Código de la lámpara</label>
           <input type="text" id="lam-codigo" placeholder="Ej: LAM-001">
         </div>
-      </div>
+        <div class="field">
       <button class="btn btn-s" style="margin-top:4px" onclick="goLamRegistros()">📋 Ver Registros</button>
     </div>
   </div>
@@ -496,20 +496,19 @@ table.ext td input,table.ext td select{padding:5px 7px;font-size:12px;border-rad
     <div class="cb">
       <div id="lam-lista"></div>
 
-      <!-- Estado -->
+      <!-- Fecha último mantenimiento -->
       <div style="margin-top:16px;border-top:1px solid #eee;padding-top:14px;">
-        <div style="font-size:12px;font-weight:600;color:var(--gm);text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px;">Estado de la lámpara</div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;" id="lam-estado-group">
-          <button class="lam-estado-btn" data-val="Operativa" style="flex:1;padding:10px;border:1.5px solid var(--bd);border-radius:6px;background:#fff;font-size:12px;font-weight:600;cursor:pointer;">✅ Operativa</button>
-          <button class="lam-estado-btn" data-val="Requiere mantenimiento" style="flex:1;padding:10px;border:1.5px solid var(--bd);border-radius:6px;background:#fff;font-size:12px;font-weight:600;cursor:pointer;">⚠️ Requiere mantenimiento</button>
-          <button class="lam-estado-btn" data-val="Fuera de servicio" style="flex:1;padding:10px;border:1.5px solid var(--bd);border-radius:6px;background:#fff;font-size:12px;font-weight:600;cursor:pointer;">🔴 Fuera de servicio</button>
+        <label>Fecha del último mantenimiento</label>
+        <input type="date" id="lam-fecha-mtto">
+        <div id="lam-mtto-alerta" style="display:none;background:#fff3cd;border:1px solid #f39c12;border-radius:6px;padding:8px 12px;margin-top:6px;font-size:12px;font-weight:600;color:#856404;">
+          ⚠️ La fecha de último mantenimiento ya pasó — Requiere mantenimiento
         </div>
       </div>
 
-      <!-- Observaciones -->
-      <div style="margin-top:14px;">
-        <label>Observaciones</label>
-        <textarea id="lam-obs" placeholder="Escriba sus observaciones..." style="min-height:70px;"></textarea>
+      <!-- Estado automático -->
+      <div id="lam-estado-auto" style="display:none;margin-top:14px;border-radius:8px;padding:14px;text-align:center;border:2px solid;">
+        <div id="lam-estado-titulo" style="font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:700;"></div>
+        <div id="lam-estado-causas" style="margin-top:8px;text-align:left;"></div>
       </div>
 
       <!-- Mini barra de progreso inline -->
@@ -1544,7 +1543,7 @@ function guardarSST(){
 }
 
 function sstGuardarEnSheets(reg, esEdicion, rowNum){
-  if(!SST_APPS_SCRIPT_URL||SST_APPS_SCRIPT_URL==='https://script.google.com/macros/s/AKfycbwx66p_7YLPy7DhAyvalNrGeJZE4QoL0rJQ1LjzB3yycz05grSgQ0VIujuqIXBIKA8/exec'){
+  if(!SST_APPS_SCRIPT_URL||SST_APPS_SCRIPT_URL==='TU_URL_APPS_SCRIPT_SST_AQUI'){
     console.warn('⚠️ URL de Apps Script SST no configurada.');
     return;
   }
@@ -1763,7 +1762,7 @@ function lamBuscarTecnico(v){
 }
 
 // ========== LÁMPARAS DE EMERGENCIA ==========
-var LAM_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwI_gAWJVAXpxM53Jb_FLLy6caxaLjitwXEIzCZc2LPd44f_vpW36TzImU_d3au3xRR/exec';
+var LAM_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwx66p_7YLPy7DhAyvalNrGeJZE4QoL0rJQ1LjzB3yycz05grSgQ0VIujuqIXBIKA8/exec';
 
 var LAM_ITEMS = [
   {id:'L1', t:'¿La lámpara está limpia y sin daños visibles?'},
@@ -1773,6 +1772,7 @@ var LAM_ITEMS = [
 ];
 
 var respuestasLam = {};
+var observacionesLam = {};
 var estadoLam = '';
 var lam_editIndex = null;
 
@@ -1812,60 +1812,109 @@ function renderLam(){
         Array.from(grupo.children).forEach(function(b){ b.classList.remove('active'); });
         btn.classList.add('active');
         respuestasLam[itemId] = op.val;
+        // Mostrar/ocultar campo obs del ítem
+        var obsDiv = document.getElementById('lam-obs-'+itemId);
+        if(obsDiv) obsDiv.style.display = (op.val==='nc') ? 'block' : 'none';
         lamActualizarPorcentaje();
       });
       grupo.appendChild(btn);
     });
     div.appendChild(grupo);
+    // Campo observación individual — solo visible si NC
+    var obsDiv = document.createElement('div');
+    obsDiv.id = 'lam-obs-'+itemId;
+    obsDiv.style.cssText = 'display:'+(respuestasLam[itemId]==='nc'?'block':'none')+';margin-top:6px;';
+    var obsInput = document.createElement('input');
+    obsInput.type = 'text';
+    obsInput.id = 'lam-obsval-'+itemId;
+    obsInput.placeholder = '¿Por qué no cumple?';
+    obsInput.style.cssText = 'font-size:11px;padding:5px 8px;border:1px solid var(--rojo);border-radius:4px;width:100%;color:#555;';
+    if(observacionesLam[itemId]) obsInput.value = observacionesLam[itemId];
+    obsInput.addEventListener('input', function(){ observacionesLam[itemId] = this.value; });
+    obsDiv.appendChild(obsInput);
+    div.appendChild(obsDiv);
     container.appendChild(div);
   });
-
-  // Estado botones
-  document.querySelectorAll('.lam-estado-btn').forEach(function(btn){
-    btn.style.background = '#fff';
-    btn.style.color = 'var(--gris)';
-    btn.style.borderColor = 'var(--bd)';
-    if(btn.dataset.val === estadoLam){
-      btn.style.background = '#4a235a';
-      btn.style.color = '#fff';
-      btn.style.borderColor = '#4a235a';
-    }
-    btn.onclick = function(){
-      estadoLam = btn.dataset.val;
-      document.querySelectorAll('.lam-estado-btn').forEach(function(b){
-        b.style.background='#fff'; b.style.color='var(--gris)'; b.style.borderColor='var(--bd)';
-      });
-      btn.style.background = '#4a235a';
-      btn.style.color = '#fff';
-      btn.style.borderColor = '#4a235a';
-    };
-  });
-
+  // Listener fecha mantenimiento
+  var fmtto = document.getElementById('lam-fecha-mtto');
+  if(fmtto) {
+    fmtto.addEventListener('change', lamVerificarMtto);
+    lamVerificarMtto();
+  }
   lamActualizarPorcentaje();
 }
 
+function lamVerificarMtto(){
+  var inp = document.getElementById('lam-fecha-mtto');
+  var alerta = document.getElementById('lam-mtto-alerta');
+  if(!inp||!alerta) return;
+  if(!inp.value){ alerta.style.display='none'; return; }
+  var hoy = new Date(); hoy.setHours(0,0,0,0);
+  var fMtto = new Date(inp.value);
+  alerta.style.display = fMtto < hoy ? 'block' : 'none';
+}
+
 function lamActualizarPorcentaje(){
-  var suma = 0, naCount = 0;
+  var suma=0, naCount=0;
+  var ncs=[];
   LAM_ITEMS.forEach(function(item){
-    var v = respuestasLam[item.id];
-    if(v === undefined || v === null) return;
-    if(v === 'na') naCount++;
-    else if(v === 'cumple') suma += 1;
+    var v=respuestasLam[item.id];
+    if(v===undefined||v===null) return;
+    if(v==='na') naCount++;
+    else if(v==='cumple') suma+=1;
+    else if(v==='nc') ncs.push(item);
   });
-  var divisor = LAM_ITEMS.length - naCount;
-  var porcentaje = divisor > 0 ? (suma / divisor) * 100 : 0;
-  var pctStr = porcentaje.toFixed(1) + '%';
-  var color = porcentaje < 50 ? '#C0392B' : porcentaje < 85 ? '#f39c12' : '#1a7a4a';
-  // Barra del footer
-  var txt = document.getElementById('lam-percent-txt');
-  var bar = document.getElementById('lam-p-bar');
-  if(txt) txt.textContent = pctStr;
-  if(bar){ bar.style.width = porcentaje + '%'; bar.style.background = color; }
-  // Barra inline (dentro de la card)
-  var txt2 = document.getElementById('lam-percent-txt2');
-  var bar2 = document.getElementById('lam-p-bar2');
-  if(txt2) txt2.textContent = pctStr;
-  if(bar2){ bar2.style.width = porcentaje + '%'; bar2.style.background = color; }
+  var divisor=LAM_ITEMS.length-naCount;
+  var porcentaje=divisor>0?(suma/divisor)*100:0;
+  var pctStr=porcentaje.toFixed(1)+'%';
+  var color=porcentaje<50?'#C0392B':porcentaje<85?'#f39c12':'#1a7a4a';
+  // Barras
+  var txt=document.getElementById('lam-percent-txt');
+  var bar=document.getElementById('lam-p-bar');
+  if(txt) txt.textContent=pctStr;
+  if(bar){ bar.style.width=porcentaje+'%'; bar.style.background=color; }
+  var txt2=document.getElementById('lam-percent-txt2');
+  var bar2=document.getElementById('lam-p-bar2');
+  if(txt2) txt2.textContent=pctStr;
+  if(bar2){ bar2.style.width=porcentaje+'%'; bar2.style.background=color; }
+  // Estado automático
+  var estadoDiv=document.getElementById('lam-estado-auto');
+  var estadoTit=document.getElementById('lam-estado-titulo');
+  var estadoCausas=document.getElementById('lam-estado-causas');
+  if(!estadoDiv) return;
+  var hayRespuestas=Object.keys(respuestasLam).length>0;
+  if(!hayRespuestas){ estadoDiv.style.display='none'; estadoLam=''; return; }
+  // Verificar mantenimiento vencido
+  var mttoVencido=false;
+  var inp=document.getElementById('lam-fecha-mtto');
+  if(inp&&inp.value){
+    var hoy=new Date(); hoy.setHours(0,0,0,0);
+    mttoVencido=new Date(inp.value)<hoy;
+  }
+  if(ncs.length===0&&!mttoVencido){
+    estadoLam='Operativa';
+    estadoDiv.style.display='block';
+    estadoDiv.style.background='var(--verde-l)';
+    estadoDiv.style.borderColor='var(--verde)';
+    estadoTit.style.color='var(--verde)';
+    estadoTit.textContent='✓ OPERATIVA';
+    estadoCausas.innerHTML='';
+  } else {
+    estadoLam='No Operativa';
+    estadoDiv.style.display='block';
+    estadoDiv.style.background='var(--rojo-l)';
+    estadoDiv.style.borderColor='var(--rojo)';
+    estadoTit.style.color='var(--rojo)';
+    estadoTit.textContent='✗ NO OPERATIVA';
+    var causasHTML='<div style="font-size:11px;font-weight:600;color:var(--rojo-d);margin-top:6px;">Causas:</div>';
+    ncs.forEach(function(item){
+      var obsVal=document.getElementById('lam-obsval-'+item.id);
+      var obs=obsVal?obsVal.value.trim():'';
+      causasHTML+='<div class="nc-item">✗ '+item.t+(obs?' — '+obs:'')+'</div>';
+    });
+    if(mttoVencido) causasHTML+='<div class="nc-item">⚠️ Fecha de último mantenimiento vencida</div>';
+    estadoCausas.innerHTML=causasHTML;
+  }
 }
 
 function guardarLam(){
@@ -1873,9 +1922,9 @@ function guardarLam(){
   var area = document.getElementById('lam-area').value.trim();
   var tecnico = document.getElementById('lam-tecnico').value.trim();
   var codigo = document.getElementById('lam-codigo').value.trim();
-  var obs = document.getElementById('lam-obs').value.trim();
+  var fechaMtto = document.getElementById('lam-fecha-mtto').value;
   if(!planta||!area||!codigo){return alert('⚠️ Llene Planta, Área y Código de lámpara.');}
-  if(!estadoLam){return alert('⚠️ Seleccione el estado de la lámpara.');}
+  if(!estadoLam){return alert('⚠️ Marque al menos un ítem para determinar el estado.');} 
   var ahora = new Date();
   var fechaActualizacion = ahora.toLocaleDateString('es-EC')+' '+ahora.toLocaleTimeString('es-EC',{hour:'2-digit',minute:'2-digit'});
   var LAM_REG = JSON.parse(localStorage.getItem('ucem_lam_registros')||'[]');
@@ -1891,7 +1940,8 @@ function guardarLam(){
     fechaActualizacion: esEdicion ? fechaActualizacion : null,
     sheetRow: rowNum,
     respuestas: JSON.parse(JSON.stringify(respuestasLam)),
-    estado: estadoLam, obs: obs,
+    observaciones: JSON.parse(JSON.stringify(observacionesLam)),
+    estado: estadoLam, fechaMtto: fechaMtto,
     porcentaje: porcentaje
   };
 
@@ -1903,9 +1953,12 @@ function guardarLam(){
   alert(esEdicion ? '✅ Lámpara actualizada.\nCumplimiento: '+porcentaje : '✅ Inspección guardada.\nCumplimiento: '+porcentaje);
 
   // Limpiar
-  respuestasLam = {}; estadoLam = '';
+  respuestasLam = {}; observacionesLam = {}; estadoLam = '';
   document.getElementById('lam-cod-input').value='';
   document.getElementById('lam-tCard').style.display='none';
+  document.getElementById('lam-fecha-mtto').value='';
+  document.getElementById('lam-mtto-alerta').style.display='none';
+  document.getElementById('lam-estado-auto').style.display='none';
   document.getElementById('lam-planta').value='';
   document.getElementById('lam-area').value='';
   document.getElementById('lam-tecnico').value='';
