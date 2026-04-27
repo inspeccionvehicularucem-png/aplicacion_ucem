@@ -485,10 +485,10 @@ table.ext td input,table.ext td select{padding:5px 7px;font-size:12px;border-rad
           <label>Código de la lámpara</label>
           <input type="text" id="lam-codigo" placeholder="Ej: LAM-001">
         </div>
-        <div class="field">
+      </div><!-- fin row2 -->
       <button class="btn btn-s" style="margin-top:4px" onclick="goLamRegistros()">📋 Ver Registros</button>
-    </div>
-  </div>
+    </div><!-- fin cb -->
+  </div><!-- fin lam-form -->
 
   <!-- Lista verificación -->
   <div class="card" id="lam-items-card">
@@ -1973,7 +1973,7 @@ function guardarLam(){
 }
 
 function lamGuardarEnSheets(reg, esEdicion, rowNum){
-  if(!LAM_APPS_SCRIPT_URL||LAM_APPS_SCRIPT_URL==='TU_URL_APPS_SCRIPT_LAMPARAS_AQUI'){
+  if(!LAM_APPS_SCRIPT_URL||LAM_APPS_SCRIPT_URL==='https://script.google.com/macros/s/AKfycbwx66p_7YLPy7DhAyvalNrGeJZE4QoL0rJQ1LjzB3yycz05grSgQ0VIujuqIXBIKA8/exec'){
     console.warn('⚠️ URL Apps Script Lámparas no configurada.');
     return;
   }
@@ -2126,168 +2126,6 @@ function lamCancelarEdicion(){
   if(banner) banner.style.display='none';
   renderLam();
   lamActualizarPorcentaje();
-}
-
-function lamEliminarReg(i){
-  if(!confirm('¿Eliminar este registro?')) return;
-  var LAM_REG=JSON.parse(localStorage.getItem('ucem_lam_registros')||'[]');
-  LAM_REG.splice(i,1);
-  localStorage.setItem('ucem_lam_registros',JSON.stringify(LAM_REG));
-  lamRenderRegistros();
-}
-
-function abrirLamparas(){
-  document.getElementById('sec-menu').classList.add('hidden');
-  document.getElementById('sec-ext').classList.add('hidden');
-  document.getElementById('sec-sst').classList.add('hidden');
-  document.getElementById('sst-footer').classList.add('hidden');
-  document.getElementById('sec-lam').classList.remove('hidden');
-  document.getElementById('lam-footer').classList.remove('hidden');
-  document.getElementById('headerTitle').textContent = 'Lámparas de Emergencia';
-  document.getElementById('headerBadge').textContent = 'FSI-014';
-  renderLam();
-  document.getElementById('lam-fecha').valueAsDate = new Date();
-}
-
-
-function guardarLam(){
-  var planta = document.getElementById('lam-planta').value;
-  var area = document.getElementById('lam-area').value.trim();
-  var tecnico = document.getElementById('lam-tecnico').value.trim();
-  var codigo = document.getElementById('lam-codigo').value.trim();
-  var obs = document.getElementById('lam-obs').value.trim();
-  if(!planta||!area||!codigo){return alert('⚠️ Llene Planta, Área y Código de lámpara.');}
-  if(!estadoLam){return alert('⚠️ Seleccione el estado de la lámpara.');}
-  var ahora = new Date();
-  var fechaGuardado = ahora.toLocaleDateString('es-EC')+' '+ahora.toLocaleTimeString('es-EC',{hour:'2-digit',minute:'2-digit'});
-  var LAM_REG = JSON.parse(localStorage.getItem('ucem_lam_registros')||'[]');
-  var reg = {
-    id: Date.now(),
-    planta: planta, area: area, tecnico: tecnico, codigo: codigo,
-    fecha: document.getElementById('lam-fecha').value,
-    fechaCreacion: fechaGuardado,
-    respuestas: JSON.parse(JSON.stringify(respuestasLam)),
-    estado: estadoLam, obs: obs
-  };
-  LAM_REG.unshift(reg);
-  localStorage.setItem('ucem_lam_registros', JSON.stringify(LAM_REG));
-  lamGuardarEnSheets(reg);
-  alert('✅ Inspección de lámpara guardada.');
-  // Limpiar
-  respuestasLam = {}; estadoLam = '';
-  document.getElementById('lam-cod-input').value='';
-  document.getElementById('lam-tCard').style.display='none';
-  document.getElementById('lam-planta').value='';
-  document.getElementById('lam-area').value='';
-  document.getElementById('lam-tecnico').value='';
-  document.getElementById('lam-codigo').value='';
-  document.getElementById('lam-obs').value='';
-  document.getElementById('lam-fecha').valueAsDate=new Date();
-  renderLam();
-  mostrarMenu();
-}
-
-function lamGuardarEnSheets(reg){
-  if(!LAM_APPS_SCRIPT_URL||LAM_APPS_SCRIPT_URL==='TU_URL_APPS_SCRIPT_LAMPARAS_AQUI'){
-    console.warn('⚠️ URL Apps Script Lámparas no configurada.');
-    return;
-  }
-  fetch(LAM_APPS_SCRIPT_URL,{method:'POST',body:JSON.stringify(reg)})
-    .then(function(res){return res.json();})
-    .then(function(data){if(data.status==='ok')console.log('✓ Lámpara guardada en Sheets');else console.error('Error:',data.msg);})
-    .catch(function(err){console.error('Error conexión:',err);});
-}
-
-function goLamRegistros(){
-  lamRenderRegistros();
-  document.getElementById('lam-pReg').classList.remove('hidden');
-  document.getElementById('lam-form').classList.add('hidden');
-  document.getElementById('lam-items-card').classList.add('hidden');
-}
-
-function lamVolverFormulario(){
-  document.getElementById('lam-pReg').classList.add('hidden');
-  document.getElementById('lam-form').classList.remove('hidden');
-  document.getElementById('lam-items-card').classList.remove('hidden');
-}
-
-function lamRenderRegistros(){
-  var LAM_REG = JSON.parse(localStorage.getItem('ucem_lam_registros')||'[]');
-  var div = document.getElementById('lam-regBody');
-  if(LAM_REG.length===0){
-    div.innerHTML='<div style="text-align:center;color:var(--gm);padding:20px;font-size:13px;">No hay inspecciones registradas aún.</div>';
-    return;
-  }
-  var mesActual=div.dataset.mesFiltro||'';
-  var plantaActual=div.dataset.plantaFiltro||'';
-  var textoActual=(div.dataset.textoFiltro||'').toLowerCase();
-  var meses={};
-  LAM_REG.forEach(function(r){
-    var key=extGetMesKey(r.fechaCreacion||r.fecha);
-    if(key) meses[key]=extGetMesLabel(r.fechaCreacion||r.fecha);
-  });
-  var opcionesMes='<option value="">Todos los meses</option>';
-  Object.keys(meses).sort().reverse().forEach(function(k){
-    opcionesMes+='<option value="'+k+'"'+(k===mesActual?' selected':'')+'>'+meses[k]+'</option>';
-  });
-  var plantas={};
-  LAM_REG.forEach(function(r){ if(r.planta) plantas[r.planta]=1; });
-  var opcionesPlanta='<option value="">Todas las plantas</option>';
-  Object.keys(plantas).sort().forEach(function(p){
-    opcionesPlanta+='<option value="'+p+'"'+(p===plantaActual?' selected':'')+'>'+p+'</option>';
-  });
-  var filtered=LAM_REG.filter(function(r){
-    var okMes=!mesActual||extGetMesKey(r.fechaCreacion||r.fecha)===mesActual;
-    var okPlanta=!plantaActual||r.planta===plantaActual;
-    var okTexto=!textoActual||
-      (r.tecnico||'').toLowerCase().includes(textoActual)||
-      (r.area||'').toLowerCase().includes(textoActual)||
-      (r.codigo||'').toLowerCase().includes(textoActual);
-    return okMes&&okPlanta&&okTexto;
-  });
-  var colorEstado={'Operativa':'#1a7a4a','Requiere mantenimiento':'#f39c12','Fuera de servicio':'#C0392B'};
-  var bgEstado={'Operativa':'#eaf7f0','Requiere mantenimiento':'#fef9e7','Fuera de servicio':'#fdf0ef'};
-  div.innerHTML=
-    '<div style="background:#f8f8f8;border:1px solid var(--bd);border-radius:8px;padding:10px;margin-bottom:12px;">'+
-      '<div style="font-size:11px;font-weight:600;color:var(--gm);margin-bottom:8px;text-transform:uppercase;letter-spacing:.4px">🔍 Filtros</div>'+
-      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">'+
-        '<div><label style="font-size:10px;font-weight:600;color:var(--gm);display:block;margin-bottom:3px">📅 Mes</label>'+
-        '<select onchange="lamSetFiltro(\'mes\',this.value)" style="width:100%;padding:6px 8px;font-size:12px;border-radius:5px;border:1.5px solid var(--bd)">'+opcionesMes+'</select></div>'+
-        '<div><label style="font-size:10px;font-weight:600;color:var(--gm);display:block;margin-bottom:3px">🏭 Planta</label>'+
-        '<select onchange="lamSetFiltro(\'planta\',this.value)" style="width:100%;padding:6px 8px;font-size:12px;border-radius:5px;border:1.5px solid var(--bd)">'+opcionesPlanta+'</select></div>'+
-      '</div>'+
-      '<div><label style="font-size:10px;font-weight:600;color:var(--gm);display:block;margin-bottom:3px">🔦 Buscar por técnico, área o código</label>'+
-      '<input type="text" value="'+(div.dataset.textoFiltro||'')+'" oninput="lamSetFiltro(\'texto\',this.value)" placeholder="Escribe para buscar..." style="width:100%;padding:6px 8px;font-size:12px;border-radius:5px;border:1.5px solid var(--bd)"></div>'+
-      '<div style="margin-top:8px;font-size:11px;color:var(--gm);text-align:right">'+filtered.length+' resultado(s) de '+LAM_REG.length+'</div>'+
-    '</div>'+
-    (filtered.length===0?'<div style="text-align:center;color:var(--gm);padding:16px;font-size:12px;">Sin registros con estos filtros.</div>':
-    filtered.map(function(r,i){
-      var realIdx=LAM_REG.indexOf(r);
-      var col=colorEstado[r.estado]||'#555';
-      var bg=bgEstado[r.estado]||'#f4f4f4';
-      return '<div class="reg-card">'+
-        '<div class="reg-top">'+
-          '<div>'+
-            '<div style="font-weight:600;font-size:13px">'+r.codigo+' — '+r.area+'</div>'+
-            '<div style="font-size:11px;color:var(--gm);margin-top:2px">'+r.planta+' · '+r.fecha+'</div>'+
-            '<div style="font-size:11px;color:var(--gm)">Técnico: '+(r.tecnico||'-')+'</div>'+
-            '<div style="font-size:10px;color:var(--gm)">Guardado: '+r.fechaCreacion+'</div>'+
-          '</div>'+
-          '<div class="reg-actions">'+
-            '<span style="background:'+bg+';color:'+col+';font-weight:700;font-size:11px;padding:4px 10px;border-radius:4px;border:1px solid '+col+'">'+r.estado+'</span>'+
-            '<button onclick="lamEliminarReg('+realIdx+')" style="border:1px solid #fcc;background:#fff5f5;color:#c0392b;">✕</button>'+
-          '</div>'+
-        '</div>'+
-      '</div>';
-    }).join(''));
-}
-
-function lamSetFiltro(tipo,val){
-  var div=document.getElementById('lam-regBody');
-  if(tipo==='mes') div.dataset.mesFiltro=val;
-  else if(tipo==='planta') div.dataset.plantaFiltro=val;
-  else if(tipo==='texto') div.dataset.textoFiltro=val;
-  lamRenderRegistros();
 }
 
 function lamEliminarReg(i){
