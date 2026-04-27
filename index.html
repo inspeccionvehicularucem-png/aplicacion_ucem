@@ -160,6 +160,12 @@ table.ext td input,table.ext td select{padding:5px 7px;font-size:12px;border-rad
         <div class="mb-title">SST ÁREAS</div>
         <div class="mb-sub">Inspección de seguridad</div>
       </div>
+      <div class="menu-btn" onclick="abrirLamparas()" style="grid-column:span 2;">
+        <div class="mb-badge">FSI-014</div>
+        <span>💡</span>
+        <div class="mb-title">LÁMPARAS DE EMERGENCIA</div>
+        <div class="mb-sub">Inspección técnica individual</div>
+      </div>
     </div>
     <div style="margin-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:12px;">
       <div class="card" style="cursor:pointer" onclick="abrirExtintores(); setTimeout(()=>goExtRegistros(),100)">
@@ -172,6 +178,12 @@ table.ext td input,table.ext td select{padding:5px 7px;font-size:12px;border-rad
         <div style="padding:14px;display:flex;align-items:center;gap:10px;">
           <span style="font-size:24px">📊</span>
           <div><div style="font-weight:600;font-size:13px">Registros SST</div><div style="font-size:11px;color:var(--gm)" id="contSSTMenu">— inspecciones</div></div>
+        </div>
+      </div>
+      <div class="card" style="cursor:pointer;grid-column:span 2;" onclick="abrirLamparas(); setTimeout(()=>goLamRegistros(),100)">
+        <div style="padding:14px;display:flex;align-items:center;gap:10px;">
+          <span style="font-size:24px">💡</span>
+          <div><div style="font-weight:600;font-size:13px">Registros Lámparas</div><div style="font-size:11px;color:var(--gm)" id="contLamMenu">— inspecciones</div></div>
         </div>
       </div>
     </div>
@@ -416,6 +428,119 @@ table.ext td input,table.ext td select{padding:5px 7px;font-size:12px;border-rad
 
 </div><!-- fin wrap -->
 
+<!-- ===================== MÓDULO LÁMPARAS ===================== -->
+<div id="sec-lam" class="hidden">
+<div class="wrap" style="padding-bottom:80px;">
+  <div class="planta-bar">
+    <div class="pi" style="background:#7d3c98;">💡</div>
+    <div><div class="pn">Inspección Lámparas de Emergencia</div><div class="ps">FSI-014 · Inspección técnica individual</div></div>
+  </div>
+
+  <!-- Banner modo edición -->
+  <div id="lam-edit-banner" style="display:none;background:#fff3cd;border:1.5px solid #f39c12;border-radius:8px;padding:10px 14px;margin-bottom:10px;align-items:center;justify-content:space-between;gap:8px;">
+    <span style="font-size:12px;font-weight:600;color:#856404;">✎ Modo edición — modifica los campos y presiona 💾 Guardar</span>
+    <button onclick="lamCancelarEdicion()" style="padding:5px 12px;border-radius:4px;border:1px solid #f39c12;background:#fff;color:#856404;font-size:11px;font-weight:600;cursor:pointer;">✕ Cancelar</button>
+  </div>
+
+  <!-- Formulario -->
+  <div id="lam-form" class="card">
+    <div class="ch"><span class="n" style="background:#7d3c98;">1</span> Datos de la inspección</div>
+    <div class="cb">
+      <div class="row2">
+        <div class="field">
+          <label>Fecha de inspección</label>
+          <input type="date" id="lam-fecha">
+        </div>
+        <div class="field">
+          <label>Localidad / Planta</label>
+          <select id="lam-planta">
+            <option value="">-- Seleccione --</option>
+            <option value="Planta Chimborazo">Planta Chimborazo</option>
+            <option value="Planta Guapán">Planta Guapán</option>
+            <option value="Planta Quito">Planta Quito</option>
+            <option value="Planta Guayaquil">Planta Guayaquil</option>
+            <option value="Planta Cuenca">Planta Cuenca</option>
+            <option value="Planta Manta">Planta Manta</option>
+            <option value="Planta Zulay">Planta Zulay</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Área / Ubicación</label>
+          <input type="text" id="lam-area" placeholder="Ej: Pasillo principal, Bodega...">
+        </div>
+        <div class="field">
+          <label>Nombre del técnico de Seguridad Industrial</label>
+          <input type="text" id="lam-tecnico" placeholder="Nombre completo">
+        </div>
+        <div class="field">
+          <label>Código de la lámpara</label>
+          <input type="text" id="lam-codigo" placeholder="Ej: LAM-001">
+        </div>
+      </div>
+      <button class="btn btn-s" style="margin-top:4px" onclick="goLamRegistros()">📋 Ver Registros</button>
+    </div>
+  </div>
+
+  <!-- Lista verificación -->
+  <div class="card" id="lam-items-card">
+    <div class="ch"><span class="n" style="background:#7d3c98;">2</span> Lista de verificación</div>
+    <div class="cb">
+      <div id="lam-lista"></div>
+
+      <!-- Estado -->
+      <div style="margin-top:16px;border-top:1px solid #eee;padding-top:14px;">
+        <div style="font-size:12px;font-weight:600;color:var(--gm);text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px;">Estado de la lámpara</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;" id="lam-estado-group">
+          <button class="lam-estado-btn" data-val="Operativa" style="flex:1;padding:10px;border:1.5px solid var(--bd);border-radius:6px;background:#fff;font-size:12px;font-weight:600;cursor:pointer;">✅ Operativa</button>
+          <button class="lam-estado-btn" data-val="Requiere mantenimiento" style="flex:1;padding:10px;border:1.5px solid var(--bd);border-radius:6px;background:#fff;font-size:12px;font-weight:600;cursor:pointer;">⚠️ Requiere mantenimiento</button>
+          <button class="lam-estado-btn" data-val="Fuera de servicio" style="flex:1;padding:10px;border:1.5px solid var(--bd);border-radius:6px;background:#fff;font-size:12px;font-weight:600;cursor:pointer;">🔴 Fuera de servicio</button>
+        </div>
+      </div>
+
+      <!-- Observaciones -->
+      <div style="margin-top:14px;">
+        <label>Observaciones</label>
+        <textarea id="lam-obs" placeholder="Escriba sus observaciones..." style="min-height:70px;"></textarea>
+      </div>
+
+      <!-- Mini barra de progreso inline -->
+      <div style="margin-top:14px;padding:12px;background:var(--gris);border-radius:8px;color:#fff;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+          <span style="font-size:12px;font-weight:600;">CUMPLIMIENTO:</span>
+          <span id="lam-percent-txt2" style="font-size:20px;font-weight:700;color:#2ecc71;">0%</span>
+        </div>
+        <div style="width:100%;background:#444;border-radius:10px;height:10px;">
+          <div id="lam-p-bar2" style="height:100%;border-radius:10px;width:0%;transition:.5s;background:var(--verde);"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Registros -->
+  <div id="lam-pReg" class="hidden">
+    <div class="card">
+      <div class="ch"><span class="n" style="background:#7d3c98;">R</span> Registros — Lámparas de Emergencia</div>
+      <div class="cb" id="lam-regBody" style="padding:10px;"></div>
+    </div>
+    <button class="btn btn-s" onclick="lamVolverFormulario()">← Volver</button>
+  </div>
+</div>
+</div>
+
+<!-- FOOTER LÁMPARAS -->
+<div id="lam-footer" class="score-box hidden" style="background:#4a235a;">
+  <div style="max-width:700px;margin:0 auto;">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+      <div style="font-size:13px;font-weight:600;">CUMPLIMIENTO: <span id="lam-percent-txt" style="color:#2ecc71;font-size:20px;">0%</span></div>
+      <div style="display:flex;gap:8px;">
+        <button onclick="goLamRegistros()" style="background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.4);padding:9px 14px;border-radius:6px;font-weight:600;cursor:pointer;font-size:12px;">📋 Registros</button>
+        <button onclick="guardarLam()" style="background:var(--verde);color:#fff;border:none;padding:9px 16px;border-radius:6px;font-weight:600;cursor:pointer;">💾 Guardar</button>
+      </div>
+    </div>
+    <div class="progress-container"><div id="lam-p-bar" class="progress-bar"></div></div>
+  </div>
+</div>
+
 <!-- FOOTER SST -->
 <div id="sst-footer" class="score-box hidden">
   <div style="max-width:700px;margin:0 auto;">
@@ -472,9 +597,10 @@ var EXT_DATA = {"TORRE DE CALCINACIÓN":[{"ubicacion":"MCC COMPRESORES","tipo":"
 <script>
 // ========== NAVEGACIÓN GLOBAL ==========
 function mostrarMenu() {
-  ['sec-ext','sec-sst'].forEach(function(id){ document.getElementById(id).classList.add('hidden'); });
+  ['sec-ext','sec-sst','sec-lam'].forEach(function(id){ document.getElementById(id).classList.add('hidden'); });
   document.getElementById('sec-menu').classList.remove('hidden');
   document.getElementById('sst-footer').classList.add('hidden');
+  document.getElementById('lam-footer').classList.add('hidden');
   document.getElementById('headerTitle').textContent = 'Sistema Global de Inspección';
   document.getElementById('headerBadge').textContent = 'v3.0';
   actualizarContadoresMenu();
@@ -483,7 +609,9 @@ function mostrarMenu() {
 function abrirExtintores() {
   document.getElementById('sec-menu').classList.add('hidden');
   document.getElementById('sec-sst').classList.add('hidden');
+  document.getElementById('sec-lam').classList.add('hidden');
   document.getElementById('sst-footer').classList.add('hidden');
+  document.getElementById('lam-footer').classList.add('hidden');
   document.getElementById('sec-ext').classList.remove('hidden');
   document.getElementById('headerTitle').textContent = 'Inspección de Extintores · ' + (extPlantaActual || 'Seleccione planta');
   document.getElementById('headerBadge').textContent = 'FSI-013 v02';
@@ -493,6 +621,8 @@ function abrirExtintores() {
 function abrirSST() {
   document.getElementById('sec-menu').classList.add('hidden');
   document.getElementById('sec-ext').classList.add('hidden');
+  document.getElementById('sec-lam').classList.add('hidden');
+  document.getElementById('lam-footer').classList.add('hidden');
   document.getElementById('sec-sst').classList.remove('hidden');
   document.getElementById('sst-footer').classList.remove('hidden');
   document.getElementById('headerTitle').textContent = 'Inspección SST Áreas';
@@ -504,8 +634,10 @@ function abrirSST() {
 function actualizarContadoresMenu() {
   var rExt = JSON.parse(localStorage.getItem('ucem_registros') || '[]');
   var rSST = JSON.parse(localStorage.getItem('ucem_sst_registros') || '[]');
+  var rLam = JSON.parse(localStorage.getItem('ucem_lam_registros') || '[]');
   document.getElementById('contExtMenu').textContent = rExt.length + ' inspección(es)';
   document.getElementById('contSSTMenu').textContent = rSST.length + ' inspección(es)';
+  document.getElementById('contLamMenu').textContent = rLam.length + ' inspección(es)';
 }
 
 // ========== EXTINTORES - NAVEGACIÓN ==========
@@ -1598,6 +1730,483 @@ function sstCancelarEdicion(){
   document.getElementById('sst-edit-banner').style.display='none';
   renderSST();
   sstActualizarPorcentaje();
+}
+
+// ========== LÁMPARAS DE EMERGENCIA ==========
+var LAM_APPS_SCRIPT_URL = 'TU_URL_APPS_SCRIPT_LAMPARAS_AQUI';
+
+var LAM_ITEMS = [
+  {id:'L1', t:'¿La lámpara está limpia y sin daños visibles?'},
+  {id:'L2', t:'¿La lámpara está libre de obstrucciones?'},
+  {id:'L3', t:'¿La lámpara enciende al cortar la energía?'},
+  {id:'L4', t:'¿La iluminación es adecuada?'}
+];
+
+var respuestasLam = {};
+var estadoLam = '';
+var lam_editIndex = null;
+
+function abrirLamparas(){
+  document.getElementById('sec-menu').classList.add('hidden');
+  document.getElementById('sec-ext').classList.add('hidden');
+  document.getElementById('sec-sst').classList.add('hidden');
+  document.getElementById('sst-footer').classList.add('hidden');
+  document.getElementById('sec-lam').classList.remove('hidden');
+  document.getElementById('lam-footer').classList.remove('hidden');
+  document.getElementById('headerTitle').textContent = 'Lámparas de Emergencia';
+  document.getElementById('headerBadge').textContent = 'FSI-014';
+  renderLam();
+  document.getElementById('lam-fecha').valueAsDate = new Date();
+}
+
+function renderLam(){
+  var container = document.getElementById('lam-lista');
+  container.innerHTML = '';
+  LAM_ITEMS.forEach(function(item){
+    var div = document.createElement('div');
+    div.className = 'item-row';
+    var itemId = item.id;
+    var txtDiv = document.createElement('div');
+    txtDiv.style.cssText = 'font-size:12px;font-weight:500;line-height:1.4;color:#444;';
+    txtDiv.textContent = item.t;
+    div.appendChild(txtDiv);
+    var grupo = document.createElement('div');
+    grupo.className = 'check-group';
+    grupo.style.gridTemplateColumns = 'repeat(3,1fr)';
+    [{lbl:'CUMPLE',cls:'c',val:'cumple'},{lbl:'NO CUMPLE',cls:'nc',val:'nc'},{lbl:'N/A',cls:'na',val:'na'}].forEach(function(op){
+      var btn = document.createElement('button');
+      btn.className = 'b-chk ' + op.cls;
+      btn.textContent = op.lbl;
+      if(respuestasLam[itemId] === op.val) btn.classList.add('active');
+      btn.addEventListener('click', function(){
+        Array.from(grupo.children).forEach(function(b){ b.classList.remove('active'); });
+        btn.classList.add('active');
+        respuestasLam[itemId] = op.val;
+        lamActualizarPorcentaje();
+      });
+      grupo.appendChild(btn);
+    });
+    div.appendChild(grupo);
+    container.appendChild(div);
+  });
+
+  // Estado botones
+  document.querySelectorAll('.lam-estado-btn').forEach(function(btn){
+    btn.style.background = '#fff';
+    btn.style.color = 'var(--gris)';
+    btn.style.borderColor = 'var(--bd)';
+    if(btn.dataset.val === estadoLam){
+      btn.style.background = '#4a235a';
+      btn.style.color = '#fff';
+      btn.style.borderColor = '#4a235a';
+    }
+    btn.onclick = function(){
+      estadoLam = btn.dataset.val;
+      document.querySelectorAll('.lam-estado-btn').forEach(function(b){
+        b.style.background='#fff'; b.style.color='var(--gris)'; b.style.borderColor='var(--bd)';
+      });
+      btn.style.background = '#4a235a';
+      btn.style.color = '#fff';
+      btn.style.borderColor = '#4a235a';
+    };
+  });
+
+  lamActualizarPorcentaje();
+}
+
+function lamActualizarPorcentaje(){
+  var suma = 0, naCount = 0;
+  LAM_ITEMS.forEach(function(item){
+    var v = respuestasLam[item.id];
+    if(v === undefined || v === null) return;
+    if(v === 'na') naCount++;
+    else if(v === 'cumple') suma += 1;
+  });
+  var divisor = LAM_ITEMS.length - naCount;
+  var porcentaje = divisor > 0 ? (suma / divisor) * 100 : 0;
+  var pctStr = porcentaje.toFixed(1) + '%';
+  var color = porcentaje < 50 ? '#C0392B' : porcentaje < 85 ? '#f39c12' : '#1a7a4a';
+  // Barra del footer
+  var txt = document.getElementById('lam-percent-txt');
+  var bar = document.getElementById('lam-p-bar');
+  if(txt) txt.textContent = pctStr;
+  if(bar){ bar.style.width = porcentaje + '%'; bar.style.background = color; }
+  // Barra inline (dentro de la card)
+  var txt2 = document.getElementById('lam-percent-txt2');
+  var bar2 = document.getElementById('lam-p-bar2');
+  if(txt2) txt2.textContent = pctStr;
+  if(bar2){ bar2.style.width = porcentaje + '%'; bar2.style.background = color; }
+}
+
+function guardarLam(){
+  var planta = document.getElementById('lam-planta').value;
+  var area = document.getElementById('lam-area').value.trim();
+  var tecnico = document.getElementById('lam-tecnico').value.trim();
+  var codigo = document.getElementById('lam-codigo').value.trim();
+  var obs = document.getElementById('lam-obs').value.trim();
+  if(!planta||!area||!codigo){return alert('⚠️ Llene Planta, Área y Código de lámpara.');}
+  if(!estadoLam){return alert('⚠️ Seleccione el estado de la lámpara.');}
+  var ahora = new Date();
+  var fechaActualizacion = ahora.toLocaleDateString('es-EC')+' '+ahora.toLocaleTimeString('es-EC',{hour:'2-digit',minute:'2-digit'});
+  var LAM_REG = JSON.parse(localStorage.getItem('ucem_lam_registros')||'[]');
+  var esEdicion = (lam_editIndex !== null && lam_editIndex !== undefined);
+  var rowNum = esEdicion && LAM_REG[lam_editIndex] ? (LAM_REG[lam_editIndex].sheetRow||null) : null;
+  var porcentaje = document.getElementById('lam-percent-txt').textContent;
+
+  var reg = {
+    id: esEdicion ? LAM_REG[lam_editIndex].id : Date.now(),
+    planta: planta, area: area, tecnico: tecnico, codigo: codigo,
+    fecha: document.getElementById('lam-fecha').value,
+    fechaCreacion: esEdicion ? LAM_REG[lam_editIndex].fechaCreacion : fechaActualizacion,
+    fechaActualizacion: esEdicion ? fechaActualizacion : null,
+    sheetRow: rowNum,
+    respuestas: JSON.parse(JSON.stringify(respuestasLam)),
+    estado: estadoLam, obs: obs,
+    porcentaje: porcentaje
+  };
+
+  if(esEdicion){ LAM_REG[lam_editIndex] = reg; lam_editIndex = null; }
+  else { LAM_REG.unshift(reg); }
+
+  localStorage.setItem('ucem_lam_registros', JSON.stringify(LAM_REG));
+  lamGuardarEnSheets(reg, esEdicion, rowNum);
+  alert(esEdicion ? '✅ Lámpara actualizada.\nCumplimiento: '+porcentaje : '✅ Inspección guardada.\nCumplimiento: '+porcentaje);
+
+  // Limpiar
+  respuestasLam = {}; estadoLam = '';
+  document.getElementById('lam-planta').value='';
+  document.getElementById('lam-area').value='';
+  document.getElementById('lam-tecnico').value='';
+  document.getElementById('lam-codigo').value='';
+  document.getElementById('lam-obs').value='';
+  document.getElementById('lam-fecha').valueAsDate=new Date();
+  // ocultar banner edición
+  var banner = document.getElementById('lam-edit-banner');
+  if(banner) banner.style.display='none';
+  renderLam();
+  mostrarMenu();
+}
+
+function lamGuardarEnSheets(reg, esEdicion, rowNum){
+  if(!LAM_APPS_SCRIPT_URL||LAM_APPS_SCRIPT_URL==='TU_URL_APPS_SCRIPT_LAMPARAS_AQUI'){
+    console.warn('⚠️ URL Apps Script Lámparas no configurada.');
+    return;
+  }
+  var payload = Object.assign({}, reg, {
+    accion: esEdicion ? 'editar' : 'nuevo',
+    rowNum: rowNum || null
+  });
+  fetch(LAM_APPS_SCRIPT_URL,{method:'POST',body:JSON.stringify(payload)})
+    .then(function(res){return res.json();})
+    .then(function(data){
+      if(data.status==='ok'){
+        console.log('✓ Lámpara guardada en Sheets');
+        if(!esEdicion && data.rowNum){
+          var LAM_REG=JSON.parse(localStorage.getItem('ucem_lam_registros')||'[]');
+          var idx=LAM_REG.findIndex(function(r){return r.id===reg.id;});
+          if(idx>=0){ LAM_REG[idx].sheetRow=data.rowNum; localStorage.setItem('ucem_lam_registros',JSON.stringify(LAM_REG)); }
+        }
+      } else { console.error('Error Lámparas:',data.msg); }
+    })
+    .catch(function(err){console.error('Error conexión:',err);});
+}
+
+function goLamRegistros(){
+  lamRenderRegistros();
+  document.getElementById('lam-pReg').classList.remove('hidden');
+  document.getElementById('lam-form').classList.add('hidden');
+  document.getElementById('lam-items-card').classList.add('hidden');
+}
+
+function lamVolverFormulario(){
+  document.getElementById('lam-pReg').classList.add('hidden');
+  document.getElementById('lam-form').classList.remove('hidden');
+  document.getElementById('lam-items-card').classList.remove('hidden');
+}
+
+function lamRenderRegistros(){
+  var LAM_REG = JSON.parse(localStorage.getItem('ucem_lam_registros')||'[]');
+  var div = document.getElementById('lam-regBody');
+  if(LAM_REG.length===0){
+    div.innerHTML='<div style="text-align:center;color:var(--gm);padding:20px;font-size:13px;">No hay inspecciones registradas aún.</div>';
+    return;
+  }
+  var mesActual=div.dataset.mesFiltro||'';
+  var plantaActual=div.dataset.plantaFiltro||'';
+  var textoActual=(div.dataset.textoFiltro||'').toLowerCase();
+  var meses={};
+  LAM_REG.forEach(function(r){
+    var key=extGetMesKey(r.fechaCreacion||r.fecha);
+    if(key) meses[key]=extGetMesLabel(r.fechaCreacion||r.fecha);
+  });
+  var opcionesMes='<option value="">Todos los meses</option>';
+  Object.keys(meses).sort().reverse().forEach(function(k){
+    opcionesMes+='<option value="'+k+'"'+(k===mesActual?' selected':'')+'>'+meses[k]+'</option>';
+  });
+  var plantas={};
+  LAM_REG.forEach(function(r){ if(r.planta) plantas[r.planta]=1; });
+  var opcionesPlanta='<option value="">Todas las plantas</option>';
+  Object.keys(plantas).sort().forEach(function(p){
+    opcionesPlanta+='<option value="'+p+'"'+(p===plantaActual?' selected':'')+'>'+p+'</option>';
+  });
+  var filtered=LAM_REG.filter(function(r){
+    var okMes=!mesActual||extGetMesKey(r.fechaCreacion||r.fecha)===mesActual;
+    var okPlanta=!plantaActual||r.planta===plantaActual;
+    var okTexto=!textoActual||
+      (r.tecnico||'').toLowerCase().includes(textoActual)||
+      (r.area||'').toLowerCase().includes(textoActual)||
+      (r.codigo||'').toLowerCase().includes(textoActual);
+    return okMes&&okPlanta&&okTexto;
+  });
+  var colorEstado={'Operativa':'#1a7a4a','Requiere mantenimiento':'#f39c12','Fuera de servicio':'#C0392B'};
+  var bgEstado={'Operativa':'#eaf7f0','Requiere mantenimiento':'#fef9e7','Fuera de servicio':'#fdf0ef'};
+  div.innerHTML=
+    '<div style="background:#f8f8f8;border:1px solid var(--bd);border-radius:8px;padding:10px;margin-bottom:12px;">'+
+      '<div style="font-size:11px;font-weight:600;color:var(--gm);margin-bottom:8px;text-transform:uppercase;letter-spacing:.4px">🔍 Filtros</div>'+
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">'+
+        '<div><label style="font-size:10px;font-weight:600;color:var(--gm);display:block;margin-bottom:3px">📅 Mes</label>'+
+        '<select onchange="lamSetFiltro(\'mes\',this.value)" style="width:100%;padding:6px 8px;font-size:12px;border-radius:5px;border:1.5px solid var(--bd)">'+opcionesMes+'</select></div>'+
+        '<div><label style="font-size:10px;font-weight:600;color:var(--gm);display:block;margin-bottom:3px">🏭 Planta</label>'+
+        '<select onchange="lamSetFiltro(\'planta\',this.value)" style="width:100%;padding:6px 8px;font-size:12px;border-radius:5px;border:1.5px solid var(--bd)">'+opcionesPlanta+'</select></div>'+
+      '</div>'+
+      '<div><label style="font-size:10px;font-weight:600;color:var(--gm);display:block;margin-bottom:3px">🔦 Buscar por técnico, área o código</label>'+
+      '<input type="text" value="'+(div.dataset.textoFiltro||'')+'" oninput="lamSetFiltro(\'texto\',this.value)" placeholder="Escribe para buscar..." style="width:100%;padding:6px 8px;font-size:12px;border-radius:5px;border:1.5px solid var(--bd)"></div>'+
+      '<div style="margin-top:8px;font-size:11px;color:var(--gm);text-align:right">'+filtered.length+' resultado(s) de '+LAM_REG.length+'</div>'+
+    '</div>'+
+    (filtered.length===0?'<div style="text-align:center;color:var(--gm);padding:16px;font-size:12px;">Sin registros con estos filtros.</div>':
+    filtered.map(function(r){
+      var realIdx=LAM_REG.indexOf(r);
+      var col=colorEstado[r.estado]||'#555';
+      var bg=bgEstado[r.estado]||'#f4f4f4';
+      var fechaInfo='Guardado: '+r.fechaCreacion+(r.fechaActualizacion?' · <span style="color:var(--azul)">Actualizado: '+r.fechaActualizacion+'</span>':'');
+      return '<div class="reg-card">'+
+        '<div class="reg-top">'+
+          '<div>'+
+            '<div style="font-weight:600;font-size:13px">'+r.codigo+' — '+r.area+'</div>'+
+            '<div style="font-size:11px;color:var(--gm);margin-top:2px">'+r.planta+' · '+r.fecha+'</div>'+
+            '<div style="font-size:11px;color:var(--gm)">Técnico: '+(r.tecnico||'-')+'</div>'+
+            '<div style="font-size:10px;color:var(--gm)">'+fechaInfo+'</div>'+
+            (r.porcentaje?'<div style="font-size:11px;color:var(--gm)">Cumplimiento: <strong>'+r.porcentaje+'</strong></div>':'')+
+          '</div>'+
+          '<div class="reg-actions">'+
+            '<span style="background:'+bg+';color:'+col+';font-weight:700;font-size:11px;padding:4px 10px;border-radius:4px;border:1px solid '+col+'">'+r.estado+'</span>'+
+            '<button onclick="lamEditarReg('+realIdx+')" style="border:1px solid #c8e6c9;background:#f1f8f1;color:#1a7a4a;">✎ Editar</button>'+
+            '<button onclick="lamEliminarReg('+realIdx+')" style="border:1px solid #fcc;background:#fff5f5;color:#c0392b;">✕</button>'+
+          '</div>'+
+        '</div>'+
+      '</div>';
+    }).join(''));
+}
+
+function lamSetFiltro(tipo,val){
+  var div=document.getElementById('lam-regBody');
+  if(tipo==='mes') div.dataset.mesFiltro=val;
+  else if(tipo==='planta') div.dataset.plantaFiltro=val;
+  else if(tipo==='texto') div.dataset.textoFiltro=val;
+  lamRenderRegistros();
+}
+
+function lamEditarReg(i){
+  var LAM_REG = JSON.parse(localStorage.getItem('ucem_lam_registros')||'[]');
+  var r = LAM_REG[i];
+  lam_editIndex = i;
+  document.getElementById('lam-planta').value = r.planta||'';
+  document.getElementById('lam-area').value = r.area||'';
+  document.getElementById('lam-tecnico').value = r.tecnico||'';
+  document.getElementById('lam-codigo').value = r.codigo||'';
+  document.getElementById('lam-obs').value = r.obs||'';
+  document.getElementById('lam-fecha').value = r.fecha||'';
+  respuestasLam = JSON.parse(JSON.stringify(r.respuestas||{}));
+  estadoLam = r.estado||'';
+  lamVolverFormulario();
+  renderLam();
+  // Mostrar banner edición
+  var banner = document.getElementById('lam-edit-banner');
+  if(banner) banner.style.display='flex';
+  lamActualizarPorcentaje();
+}
+
+function lamCancelarEdicion(){
+  lam_editIndex = null;
+  respuestasLam = {}; estadoLam = '';
+  document.getElementById('lam-planta').value='';
+  document.getElementById('lam-area').value='';
+  document.getElementById('lam-tecnico').value='';
+  document.getElementById('lam-codigo').value='';
+  document.getElementById('lam-obs').value='';
+  document.getElementById('lam-fecha').valueAsDate=new Date();
+  var banner = document.getElementById('lam-edit-banner');
+  if(banner) banner.style.display='none';
+  renderLam();
+  lamActualizarPorcentaje();
+}
+
+function lamEliminarReg(i){
+  if(!confirm('¿Eliminar este registro?')) return;
+  var LAM_REG=JSON.parse(localStorage.getItem('ucem_lam_registros')||'[]');
+  LAM_REG.splice(i,1);
+  localStorage.setItem('ucem_lam_registros',JSON.stringify(LAM_REG));
+  lamRenderRegistros();
+}
+
+function abrirLamparas(){
+  document.getElementById('sec-menu').classList.add('hidden');
+  document.getElementById('sec-ext').classList.add('hidden');
+  document.getElementById('sec-sst').classList.add('hidden');
+  document.getElementById('sst-footer').classList.add('hidden');
+  document.getElementById('sec-lam').classList.remove('hidden');
+  document.getElementById('lam-footer').classList.remove('hidden');
+  document.getElementById('headerTitle').textContent = 'Lámparas de Emergencia';
+  document.getElementById('headerBadge').textContent = 'FSI-014';
+  renderLam();
+  document.getElementById('lam-fecha').valueAsDate = new Date();
+}
+
+
+function guardarLam(){
+  var planta = document.getElementById('lam-planta').value;
+  var area = document.getElementById('lam-area').value.trim();
+  var tecnico = document.getElementById('lam-tecnico').value.trim();
+  var codigo = document.getElementById('lam-codigo').value.trim();
+  var obs = document.getElementById('lam-obs').value.trim();
+  if(!planta||!area||!codigo){return alert('⚠️ Llene Planta, Área y Código de lámpara.');}
+  if(!estadoLam){return alert('⚠️ Seleccione el estado de la lámpara.');}
+  var ahora = new Date();
+  var fechaGuardado = ahora.toLocaleDateString('es-EC')+' '+ahora.toLocaleTimeString('es-EC',{hour:'2-digit',minute:'2-digit'});
+  var LAM_REG = JSON.parse(localStorage.getItem('ucem_lam_registros')||'[]');
+  var reg = {
+    id: Date.now(),
+    planta: planta, area: area, tecnico: tecnico, codigo: codigo,
+    fecha: document.getElementById('lam-fecha').value,
+    fechaCreacion: fechaGuardado,
+    respuestas: JSON.parse(JSON.stringify(respuestasLam)),
+    estado: estadoLam, obs: obs
+  };
+  LAM_REG.unshift(reg);
+  localStorage.setItem('ucem_lam_registros', JSON.stringify(LAM_REG));
+  lamGuardarEnSheets(reg);
+  alert('✅ Inspección de lámpara guardada.');
+  // Limpiar
+  respuestasLam = {}; estadoLam = '';
+  document.getElementById('lam-planta').value='';
+  document.getElementById('lam-area').value='';
+  document.getElementById('lam-tecnico').value='';
+  document.getElementById('lam-codigo').value='';
+  document.getElementById('lam-obs').value='';
+  document.getElementById('lam-fecha').valueAsDate=new Date();
+  renderLam();
+  mostrarMenu();
+}
+
+function lamGuardarEnSheets(reg){
+  if(!LAM_APPS_SCRIPT_URL||LAM_APPS_SCRIPT_URL==='https://script.google.com/macros/s/AKfycbwI_gAWJVAXpxM53Jb_FLLy6caxaLjitwXEIzCZc2LPd44f_vpW36TzImU_d3au3xRR/exec'){
+    console.warn('⚠️ URL Apps Script Lámparas no configurada.');
+    return;
+  }
+  fetch(LAM_APPS_SCRIPT_URL,{method:'POST',body:JSON.stringify(reg)})
+    .then(function(res){return res.json();})
+    .then(function(data){if(data.status==='ok')console.log('✓ Lámpara guardada en Sheets');else console.error('Error:',data.msg);})
+    .catch(function(err){console.error('Error conexión:',err);});
+}
+
+function goLamRegistros(){
+  lamRenderRegistros();
+  document.getElementById('lam-pReg').classList.remove('hidden');
+  document.getElementById('lam-form').classList.add('hidden');
+  document.getElementById('lam-items-card').classList.add('hidden');
+}
+
+function lamVolverFormulario(){
+  document.getElementById('lam-pReg').classList.add('hidden');
+  document.getElementById('lam-form').classList.remove('hidden');
+  document.getElementById('lam-items-card').classList.remove('hidden');
+}
+
+function lamRenderRegistros(){
+  var LAM_REG = JSON.parse(localStorage.getItem('ucem_lam_registros')||'[]');
+  var div = document.getElementById('lam-regBody');
+  if(LAM_REG.length===0){
+    div.innerHTML='<div style="text-align:center;color:var(--gm);padding:20px;font-size:13px;">No hay inspecciones registradas aún.</div>';
+    return;
+  }
+  var mesActual=div.dataset.mesFiltro||'';
+  var plantaActual=div.dataset.plantaFiltro||'';
+  var textoActual=(div.dataset.textoFiltro||'').toLowerCase();
+  var meses={};
+  LAM_REG.forEach(function(r){
+    var key=extGetMesKey(r.fechaCreacion||r.fecha);
+    if(key) meses[key]=extGetMesLabel(r.fechaCreacion||r.fecha);
+  });
+  var opcionesMes='<option value="">Todos los meses</option>';
+  Object.keys(meses).sort().reverse().forEach(function(k){
+    opcionesMes+='<option value="'+k+'"'+(k===mesActual?' selected':'')+'>'+meses[k]+'</option>';
+  });
+  var plantas={};
+  LAM_REG.forEach(function(r){ if(r.planta) plantas[r.planta]=1; });
+  var opcionesPlanta='<option value="">Todas las plantas</option>';
+  Object.keys(plantas).sort().forEach(function(p){
+    opcionesPlanta+='<option value="'+p+'"'+(p===plantaActual?' selected':'')+'>'+p+'</option>';
+  });
+  var filtered=LAM_REG.filter(function(r){
+    var okMes=!mesActual||extGetMesKey(r.fechaCreacion||r.fecha)===mesActual;
+    var okPlanta=!plantaActual||r.planta===plantaActual;
+    var okTexto=!textoActual||
+      (r.tecnico||'').toLowerCase().includes(textoActual)||
+      (r.area||'').toLowerCase().includes(textoActual)||
+      (r.codigo||'').toLowerCase().includes(textoActual);
+    return okMes&&okPlanta&&okTexto;
+  });
+  var colorEstado={'Operativa':'#1a7a4a','Requiere mantenimiento':'#f39c12','Fuera de servicio':'#C0392B'};
+  var bgEstado={'Operativa':'#eaf7f0','Requiere mantenimiento':'#fef9e7','Fuera de servicio':'#fdf0ef'};
+  div.innerHTML=
+    '<div style="background:#f8f8f8;border:1px solid var(--bd);border-radius:8px;padding:10px;margin-bottom:12px;">'+
+      '<div style="font-size:11px;font-weight:600;color:var(--gm);margin-bottom:8px;text-transform:uppercase;letter-spacing:.4px">🔍 Filtros</div>'+
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">'+
+        '<div><label style="font-size:10px;font-weight:600;color:var(--gm);display:block;margin-bottom:3px">📅 Mes</label>'+
+        '<select onchange="lamSetFiltro(\'mes\',this.value)" style="width:100%;padding:6px 8px;font-size:12px;border-radius:5px;border:1.5px solid var(--bd)">'+opcionesMes+'</select></div>'+
+        '<div><label style="font-size:10px;font-weight:600;color:var(--gm);display:block;margin-bottom:3px">🏭 Planta</label>'+
+        '<select onchange="lamSetFiltro(\'planta\',this.value)" style="width:100%;padding:6px 8px;font-size:12px;border-radius:5px;border:1.5px solid var(--bd)">'+opcionesPlanta+'</select></div>'+
+      '</div>'+
+      '<div><label style="font-size:10px;font-weight:600;color:var(--gm);display:block;margin-bottom:3px">🔦 Buscar por técnico, área o código</label>'+
+      '<input type="text" value="'+(div.dataset.textoFiltro||'')+'" oninput="lamSetFiltro(\'texto\',this.value)" placeholder="Escribe para buscar..." style="width:100%;padding:6px 8px;font-size:12px;border-radius:5px;border:1.5px solid var(--bd)"></div>'+
+      '<div style="margin-top:8px;font-size:11px;color:var(--gm);text-align:right">'+filtered.length+' resultado(s) de '+LAM_REG.length+'</div>'+
+    '</div>'+
+    (filtered.length===0?'<div style="text-align:center;color:var(--gm);padding:16px;font-size:12px;">Sin registros con estos filtros.</div>':
+    filtered.map(function(r,i){
+      var realIdx=LAM_REG.indexOf(r);
+      var col=colorEstado[r.estado]||'#555';
+      var bg=bgEstado[r.estado]||'#f4f4f4';
+      return '<div class="reg-card">'+
+        '<div class="reg-top">'+
+          '<div>'+
+            '<div style="font-weight:600;font-size:13px">'+r.codigo+' — '+r.area+'</div>'+
+            '<div style="font-size:11px;color:var(--gm);margin-top:2px">'+r.planta+' · '+r.fecha+'</div>'+
+            '<div style="font-size:11px;color:var(--gm)">Técnico: '+(r.tecnico||'-')+'</div>'+
+            '<div style="font-size:10px;color:var(--gm)">Guardado: '+r.fechaCreacion+'</div>'+
+          '</div>'+
+          '<div class="reg-actions">'+
+            '<span style="background:'+bg+';color:'+col+';font-weight:700;font-size:11px;padding:4px 10px;border-radius:4px;border:1px solid '+col+'">'+r.estado+'</span>'+
+            '<button onclick="lamEliminarReg('+realIdx+')" style="border:1px solid #fcc;background:#fff5f5;color:#c0392b;">✕</button>'+
+          '</div>'+
+        '</div>'+
+      '</div>';
+    }).join(''));
+}
+
+function lamSetFiltro(tipo,val){
+  var div=document.getElementById('lam-regBody');
+  if(tipo==='mes') div.dataset.mesFiltro=val;
+  else if(tipo==='planta') div.dataset.plantaFiltro=val;
+  else if(tipo==='texto') div.dataset.textoFiltro=val;
+  lamRenderRegistros();
+}
+
+function lamEliminarReg(i){
+  if(!confirm('¿Eliminar este registro?')) return;
+  var LAM_REG=JSON.parse(localStorage.getItem('ucem_lam_registros')||'[]');
+  LAM_REG.splice(i,1);
+  localStorage.setItem('ucem_lam_registros',JSON.stringify(LAM_REG));
+  lamRenderRegistros();
 }
 
 // ========== INIT ==========
