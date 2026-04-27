@@ -248,6 +248,13 @@ table.ext td input,table.ext td select{padding:5px 7px;font-size:12px;border-rad
           </div>
           <div id="ext-modalGestionAreas" style="display:none;background:#fff5f5;border:1.5px solid #f5b7b1;border-radius:8px;padding:12px;margin-bottom:10px;">
             <div style="font-size:12px;font-weight:600;color:var(--rojo);margin-bottom:8px;">Áreas y ubicaciones personalizadas ★</div>
+            <!-- Formulario agregar nueva área -->
+            <div style="background:#fff;border:1px solid #f5b7b1;border-radius:6px;padding:10px;margin-bottom:10px;">
+              <div style="font-size:11px;font-weight:600;color:var(--gris);margin-bottom:6px;">➕ Agregar nueva área con ubicación</div>
+              <input type="text" id="ext-nuevaAreaNombre" placeholder="Nombre del área (Ej: Bodega Norte)" style="margin-bottom:6px;font-size:12px;padding:6px 8px;border:1.5px solid var(--bd);border-radius:4px;width:100%;">
+              <input type="text" id="ext-nuevaAreaUbic" placeholder="Ubicación (Ej: Puerta principal)" style="margin-bottom:6px;font-size:12px;padding:6px 8px;border:1.5px solid var(--bd);border-radius:4px;width:100%;">
+              <button onclick="extAgregarAreaNueva()" style="width:100%;padding:7px;background:var(--rojo);color:#fff;border:none;border-radius:4px;font-size:12px;font-weight:600;cursor:pointer;">+ Agregar área</button>
+            </div>
             <div id="ext-listaAreasCustom"></div>
           </div>
         </div>
@@ -525,8 +532,15 @@ function goExtRegistros() {
 
 function extBuscar(v) {
   var t=null;
+  var plantaKey=extPlantaActual.replace('Planta ','').toUpperCase().trim();
   for(var i=0;i<EXT_TRABAJADORES.length;i++){
-    if(EXT_TRABAJADORES[i].c===v.trim()){t=EXT_TRABAJADORES[i];break;}
+    if(EXT_TRABAJADORES[i].c===v.trim() && EXT_TRABAJADORES[i].p===plantaKey){t=EXT_TRABAJADORES[i];break;}
+  }
+  // Si no encuentra por planta, busca en cualquier planta
+  if(!t){
+    for(var i=0;i<EXT_TRABAJADORES.length;i++){
+      if(EXT_TRABAJADORES[i].c===v.trim()){t=EXT_TRABAJADORES[i];break;}
+    }
   }
   var card=document.getElementById('ext-tCard');
   var err=document.getElementById('ext-tErr');
@@ -547,7 +561,7 @@ function extGoP1(){
   var sel=document.getElementById('ext-plantaSelect').value;
   if(!sel){alert('Selecciona una planta para continuar.');return;}
   extPlantaActual=sel;
-  extEsChimborazo=(sel==='Planta Chimborazo');
+  extEsChimborazo=true; // Todas las plantas usan código de trabajador
   document.getElementById('extPlantaBarNombre').textContent=sel;
   document.getElementById('headerTitle').textContent='Inspección de Extintores · '+sel;
   document.getElementById('ext-p1Chimborazo').classList.toggle('hidden',!extEsChimborazo);
@@ -1093,6 +1107,20 @@ function extAgregarUbicFila(i){
   document.getElementById('ext-nuevaUbicFila-'+i).style.display='none';
 }
 
+function extAgregarAreaNueva(){
+  var area=document.getElementById('ext-nuevaAreaNombre').value.trim();
+  var ubic=document.getElementById('ext-nuevaAreaUbic').value.trim();
+  if(!area){alert('Escribe el nombre del área.');return;}
+  var custom=JSON.parse(localStorage.getItem('ucem_custom_areas')||'{}');
+  if(!custom[area]) custom[area]=[];
+  if(ubic) custom[area].push({ubicacion:ubic,tipo:'',capacidad:'',marca:''});
+  localStorage.setItem('ucem_custom_areas',JSON.stringify(custom));
+  document.getElementById('ext-nuevaAreaNombre').value='';
+  document.getElementById('ext-nuevaAreaUbic').value='';
+  extCargarAreas();
+  extRenderAreasCustom();
+}
+
 function extToggleGestionAreas(){
   var div=document.getElementById('ext-modalGestionAreas');
   div.style.display=div.style.display==='none'?'block':'none';
@@ -1168,7 +1196,7 @@ function extEliminarUbicCustom(area,idx){
 }
 
 // ========== SST ==========
-var SST_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxoqu_X272kIVTKOz8NsJjA_vrU8YiFWsH-l3_1D43Z0fms1s9ubWjuqUaZXK84cJTejA/exec';
+var SST_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzeVw2wwZMjS3ajAqnUeoYWRqLwnC5NrUNZzBhsL339HJFV6N_0Tu8YlOVp2TDr0sfkPQ/exec';
 
 var ITEMS_SST=[
   {id:"1",t:"PELIGROS FÍSICOS",isCat:true},
