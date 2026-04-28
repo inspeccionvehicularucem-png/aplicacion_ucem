@@ -397,7 +397,12 @@ table.ext td input,table.ext td select{padding:5px 7px;font-size:12px;border-rad
           </div>
           <div class="field">
             <label>Código del Trabajador</label>
-            <input type="text" id="sst-codigo" placeholder="ID o Código">
+            <input type="text" id="sst-codigo" placeholder="ID o Código" oninput="sstBuscarTrabajador(this.value)">
+            <div id="sst-tCard" style="display:none;background:#eef5fd;border:1px solid #b3d4f5;border-radius:6px;padding:10px;margin-top:6px;">
+              <div id="sst-tNom" style="font-size:13px;font-weight:600;color:var(--azul);"></div>
+              <div id="sst-tDet" style="font-size:11px;color:var(--gm);margin-top:2px;"></div>
+            </div>
+            <div id="sst-tErr" style="display:none;color:var(--rojo);font-size:12px;margin-top:4px;">Código no encontrado</div>
           </div>
           <div class="field">
             <label>Fecha</label>
@@ -1542,6 +1547,8 @@ function guardarSST(){
   document.getElementById('sst-area').value='';
   document.getElementById('sst-inspector').value='';
   document.getElementById('sst-codigo').value='';
+  document.getElementById('sst-tCard').style.display='none';
+  document.getElementById('sst-tErr').style.display='none';
   document.getElementById('sst-fecha').valueAsDate=new Date();
   renderSST();
   sstActualizarPorcentaje();
@@ -1740,10 +1747,33 @@ function sstCancelarEdicion(){
   document.getElementById('sst-area').value='';
   document.getElementById('sst-inspector').value='';
   document.getElementById('sst-codigo').value='';
+  document.getElementById('sst-tCard').style.display='none';
+  document.getElementById('sst-tErr').style.display='none';
   document.getElementById('sst-fecha').valueAsDate=new Date();
   document.getElementById('sst-edit-banner').style.display='none';
   renderSST();
   sstActualizarPorcentaje();
+}
+
+function sstBuscarTrabajador(v){
+  var t=null;
+  for(var i=0;i<EXT_TRABAJADORES.length;i++){
+    if(EXT_TRABAJADORES[i].c===v.trim()){t=EXT_TRABAJADORES[i];break;}
+  }
+  var card=document.getElementById('sst-tCard');
+  var err=document.getElementById('sst-tErr');
+  var nomInput=document.getElementById('sst-inspector');
+  if(t){
+    document.getElementById('sst-tNom').textContent=t.n;
+    document.getElementById('sst-tDet').textContent=t.cargo+' · Planta '+t.p;
+    card.style.display='block'; err.style.display='none';
+    nomInput.value=t.n;
+  } else {
+    card.style.display='none';
+    if(v.length>=3) err.style.display='block';
+    else err.style.display='none';
+    if(!v) nomInput.value='';
+  }
 }
 
 function lamBuscarTecnico(v){
@@ -1979,7 +2009,7 @@ function guardarLam(){
 }
 
 function lamGuardarEnSheets(reg, esEdicion, rowNum){
-  if(!LAM_APPS_SCRIPT_URL||LAM_APPS_SCRIPT_URL==='lAMPARAS_AQUI '){
+  if(!LAM_APPS_SCRIPT_URL){
     console.warn('⚠️ URL Apps Script Lámparas no configurada.');
     return;
   }
