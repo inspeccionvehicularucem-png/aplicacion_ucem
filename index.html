@@ -149,19 +149,19 @@ table.ext td input,table.ext td select{padding:5px 7px;font-size:12px;border-rad
     </div>
     <div class="menu-grid">
       <div class="menu-btn" onclick="abrirExtintores()">
-        <div class="mb-badge">FSI-013</div>
+        <div class="mb-badge">RSI-CO-01-GL</div>
         <span>🧯</span>
         <div class="mb-title">EXTINTORES</div>
         <div class="mb-sub">Inspección técnica individual</div>
       </div>
       <div class="menu-btn" onclick="abrirSST()">
-        <div class="mb-badge">RSI-CO-01</div>
+        <div class="mb-badge">RSSO-CO-07-GL</div>
         <span>🛡️</span>
         <div class="mb-title">SST ÁREAS</div>
         <div class="mb-sub">Inspección de seguridad</div>
       </div>
       <div class="menu-btn" onclick="abrirLamparas()" style="grid-column:span 2;">
-        <div class="mb-badge">FSI-014</div>
+        <div class="mb-badge">RSI-CO-02-GL</div>
         <span>💡</span>
         <div class="mb-title">LÁMPARAS DE EMERGENCIA</div>
         <div class="mb-sub">Inspección técnica individual</div>
@@ -193,7 +193,7 @@ table.ext td input,table.ext td select{padding:5px 7px;font-size:12px;border-rad
   <div id="sec-ext" class="hidden">
     <div class="planta-bar">
       <div class="pi">🧯</div>
-      <div><div class="pn" id="extPlantaBarNombre">Seleccione una planta</div><div class="ps">Inspección de Extintores · FSI-013</div></div>
+      <div><div class="pn" id="extPlantaBarNombre">Seleccione una planta</div><div class="ps">Inspección de Extintores · RSI-CO-01-GL</div></div>
     </div>
     <div class="steps" id="ext-steps">
       <div class="step active" id="ext-s0">0. Planta</div>
@@ -320,7 +320,7 @@ table.ext td input,table.ext td select{padding:5px 7px;font-size:12px;border-rad
     <div id="ext-p4" class="hidden">
       <div id="ext-resBox"></div>
       <div id="pdfWrap">
-        <div class="pdf-hdr"><span>📄 Informe de Inspección</span><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;">FSI-013 | Rev.02 | 27-10-2025</span></div>
+        <div class="pdf-hdr"><span>📄 Informe de Inspección</span><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;">RSI-CO-01-GL | Rev.02 | 27-10-2025</span></div>
         <div class="pdf-body" id="pdfBody"></div>
       </div>
       <button class="btn btn-az" onclick="window.print()">⬇ Descargar / Imprimir PDF</button>
@@ -356,7 +356,7 @@ table.ext td input,table.ext td select{padding:5px 7px;font-size:12px;border-rad
   <div id="sec-sst" class="hidden">
     <div class="planta-bar">
       <div class="pi" style="background:var(--azul)">🛡️</div>
-      <div><div class="pn">Inspección SST — Áreas</div><div class="ps">RSI-CO-01-GL · Seguridad y Salud en el Trabajo</div></div>
+      <div><div class="pn">Inspección SST — Áreas</div><div class="ps">RSSO-CO-07-GL · Seguridad y Salud en el Trabajo</div></div>
     </div>
 
     <!-- Banner modo edición -->
@@ -438,7 +438,7 @@ table.ext td input,table.ext td select{padding:5px 7px;font-size:12px;border-rad
 <div class="wrap" style="padding-bottom:80px;">
   <div class="planta-bar">
     <div class="pi" style="background:#7d3c98;">💡</div>
-    <div><div class="pn">Inspección Lámparas de Emergencia</div><div class="ps">FSI-014 · Inspección técnica individual</div></div>
+    <div><div class="pn">Inspección Lámparas de Emergencia</div><div class="ps">RSI-CO-02-GL · Inspección técnica individual</div></div>
   </div>
 
   <!-- Banner modo edición -->
@@ -633,7 +633,7 @@ function abrirExtintores() {
   document.getElementById('lam-footer').classList.add('hidden');
   document.getElementById('sec-ext').classList.remove('hidden');
   document.getElementById('headerTitle').textContent = 'Inspección de Extintores · ' + (extPlantaActual || 'Seleccione planta');
-  document.getElementById('headerBadge').textContent = 'FSI-013 v02';
+  document.getElementById('headerBadge').textContent = 'RSI-CO-01-GL';
   extCargarAreas();
 }
 
@@ -645,7 +645,7 @@ function abrirSST() {
   document.getElementById('sec-sst').classList.remove('hidden');
   document.getElementById('sst-footer').classList.remove('hidden');
   document.getElementById('headerTitle').textContent = 'Inspección SST Áreas';
-  document.getElementById('headerBadge').textContent = 'RSI-CO-01';
+  document.getElementById('headerBadge').textContent = 'RSSO-CO-07-GL';
   renderSST();
   document.getElementById('sst-fecha').valueAsDate = new Date();
 }
@@ -955,7 +955,7 @@ function extRenderRes(ncs,rowData){
     '<div style="text-align:center;margin-bottom:12px">'+
       '<div style="font-size:10px;color:#666;font-family:monospace">UNIÓN CEMENTERA NACIONAL UCEM S.A. · SEGURIDAD INDUSTRIAL</div>'+
       '<div style="font-size:16px;font-weight:700;letter-spacing:1px;margin:4px 0">INSPECCIÓN DE EXTINTORES</div>'+
-      '<div style="font-size:10px;color:#888">Código: FSI-013 | Versión: 02 | Fecha Aprobación: 27-10-2025</div>'+
+      '<div style="font-size:10px;color:#888">Código: RSI-CO-01-GL | Versión: 02 | Fecha Aprobación: 27-10-2025</div>'+
     '</div>'+
     '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px">'+
       '<div style="background:#f4f4f4;padding:6px 8px;border-radius:4px"><div style="font-size:9px;color:#666;text-transform:uppercase;font-weight:600">Fecha</div><div style="font-size:11px;font-weight:600">'+fecha+'</div></div>'+
@@ -1669,6 +1669,7 @@ function sstRenderRegistros(){
           '<div class="reg-actions">'+
             '<span style="background:'+bg+';color:'+color+';font-weight:700;font-size:14px;padding:5px 12px;border-radius:4px;border:1px solid '+color+'">'+r.porcentaje+'</span>'+
             '<button onclick="sstEditarReg('+realIdx+')" style="border:1px solid #c8e6c9;background:#f1f8f1;color:#1a7a4a;">✎ Editar</button>'+
+            '<button onclick="sstImprimirReg('+realIdx+')" style="border:1px solid #b3d4f5;background:#f0f7ff;color:var(--azul);">⬇ PDF</button>'+
             '<button onclick="sstEliminarReg('+realIdx+')" style="border:1px solid #fcc;background:#fff5f5;color:#c0392b;">✕ Eliminar</button>'+
           '</div>'+
         '</div>'+
@@ -1820,7 +1821,7 @@ function abrirLamparas(){
   document.getElementById('sec-lam').classList.remove('hidden');
   document.getElementById('lam-footer').classList.remove('hidden');
   document.getElementById('headerTitle').textContent = 'Lámparas de Emergencia';
-  document.getElementById('headerBadge').textContent = 'FSI-014';
+  document.getElementById('headerBadge').textContent = 'RSI-CO-02-GL';
   renderLam();
   document.getElementById('lam-fecha').valueAsDate = new Date();
 }
@@ -2112,6 +2113,7 @@ function lamRenderRegistros(){
           '<div class="reg-actions">'+
             '<span style="background:'+bg+';color:'+col+';font-weight:700;font-size:11px;padding:4px 10px;border-radius:4px;border:1px solid '+col+'">'+r.estado+'</span>'+
             '<button onclick="lamEditarReg('+realIdx+')" style="border:1px solid #c8e6c9;background:#f1f8f1;color:#1a7a4a;">✎ Editar</button>'+
+            '<button onclick="lamImprimirReg('+realIdx+')" style="border:1px solid #b3d4f5;background:#f0f7ff;color:var(--azul);">⬇ PDF</button>'+
             '<button onclick="lamEliminarReg('+realIdx+')" style="border:1px solid #fcc;background:#fff5f5;color:#c0392b;">✕</button>'+
           '</div>'+
         '</div>'+
@@ -2170,6 +2172,141 @@ function lamEliminarReg(i){
   LAM_REG.splice(i,1);
   localStorage.setItem('ucem_lam_registros',JSON.stringify(LAM_REG));
   lamRenderRegistros();
+}
+
+// ========== PDF SST ==========
+function sstImprimirReg(i){
+  var SST_REG=JSON.parse(localStorage.getItem('ucem_sst_registros')||'[]');
+  var r=SST_REG[i];
+  if(!r) return;
+  var itemsNocat=ITEMS_SST.filter(function(x){return !x.isCat;});
+  var html='<div style="font-family:Arial,sans-serif;font-size:11px;max-width:900px;margin:0 auto;padding:20px;">';
+  // Header
+  html+='<div style="text-align:center;margin-bottom:16px;">';
+  html+='<div style="font-size:10px;color:#666;">UNIÓN CEMENTERA NACIONAL UCEM S.A. · SEGURIDAD INDUSTRIAL</div>';
+  html+='<div style="font-size:18px;font-weight:700;letter-spacing:1px;margin:4px 0;">INSPECCIÓN SST — ÁREAS</div>';
+  html+='<div style="font-size:10px;color:#888;">Código: RSSO-CO-07-GL | Fecha: '+(r.fechaCreacion||r.fecha)+'</div>';
+  html+='</div>';
+  // Datos
+  html+='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:14px;">';
+  html+='<div style="background:#f4f4f4;padding:6px 8px;border-radius:4px;"><div style="font-size:9px;color:#666;font-weight:600;">PLANTA</div><div style="font-weight:600;">'+r.planta+'</div></div>';
+  html+='<div style="background:#f4f4f4;padding:6px 8px;border-radius:4px;"><div style="font-size:9px;color:#666;font-weight:600;">LOCALIDAD</div><div style="font-weight:600;">'+r.localidad+'</div></div>';
+  html+='<div style="background:#f4f4f4;padding:6px 8px;border-radius:4px;"><div style="font-size:9px;color:#666;font-weight:600;">ÁREA</div><div style="font-weight:600;">'+r.area+'</div></div>';
+  html+='<div style="background:#f4f4f4;padding:6px 8px;border-radius:4px;"><div style="font-size:9px;color:#666;font-weight:600;">TRABAJADOR</div><div style="font-weight:600;">'+(r.inspector||'-')+'</div></div>';
+  html+='<div style="background:#f4f4f4;padding:6px 8px;border-radius:4px;"><div style="font-size:9px;color:#666;font-weight:600;">CÓDIGO</div><div style="font-weight:600;">'+(r.codigo||'-')+'</div></div>';
+  html+='<div style="background:#f4f4f4;padding:6px 8px;border-radius:4px;"><div style="font-size:9px;color:#666;font-weight:600;">FECHA</div><div style="font-weight:600;">'+r.fecha+'</div></div>';
+  html+='</div>';
+  // Cumplimiento
+  var pct=parseFloat(r.porcentaje)||0;
+  var pctColor=pct>=85?'#1a7a4a':pct>=50?'#f39c12':'#C0392B';
+  html+='<div style="background:#2c2c2c;color:#fff;padding:10px 14px;border-radius:6px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;">';
+  html+='<span style="font-weight:600;">CUMPLIMIENTO</span>';
+  html+='<span style="font-size:20px;font-weight:700;color:'+pctColor+'">'+r.porcentaje+'</span>';
+  html+='</div>';
+  // Tabla ítems
+  html+='<table style="width:100%;border-collapse:collapse;font-size:10px;margin-bottom:14px;">';
+  html+='<thead><tr style="background:#2c2c2c;color:#fff;">';
+  html+='<th style="padding:6px 8px;text-align:left;">ÍTEM</th>';
+  html+='<th style="padding:6px 8px;text-align:center;width:80px;">RESULTADO</th>';
+  html+='<th style="padding:6px 8px;text-align:left;">OBSERVACIÓN</th>';
+  html+='</tr></thead><tbody>';
+  var catActual='';
+  ITEMS_SST.forEach(function(item){
+    if(item.isCat){
+      html+='<tr><td colspan="3" style="background:#1a5276;color:#fff;padding:5px 8px;font-weight:700;">'+item.id+'. '+item.t+'</td></tr>';
+    } else {
+      var v=r.respuestas?r.respuestas[item.id]:undefined;
+      var lbl=v===1?'CUMPLE':v===0.5?'PARCIAL':v===0?'NO CUMPLE':v==='na'?'N/A':'S/R';
+      var vc=v===1?'#1a7a4a':v===0.5?'#f39c12':v===0?'#C0392B':v==='na'?'#888':'#999';
+      var obs=(r.observaciones&&r.observaciones[item.id])||'';
+      var bg=(v===0)?'#fdf0ef':'#fff';
+      html+='<tr style="background:'+bg+';border-bottom:1px solid #eee;">';
+      html+='<td style="padding:4px 8px;">'+item.id+'. '+item.t+'</td>';
+      html+='<td style="padding:4px 8px;text-align:center;font-weight:700;color:'+vc+';">'+lbl+'</td>';
+      html+='<td style="padding:4px 8px;color:#555;">'+obs+'</td>';
+      html+='</tr>';
+    }
+  });
+  html+='</tbody></table>';
+  html+='<div style="margin-top:16px;display:flex;justify-content:space-between;font-size:10px;color:#555;">';
+  html+='<span>Realizado por: <strong>'+(r.inspector||'-')+'</strong></span>';
+  html+='<span>CUMPLE=1 &nbsp; PARCIAL=0.5 &nbsp; NO CUMPLE=0 &nbsp; N/A=No Aplica</span>';
+  html+='</div></div>';
+  // Abrir ventana de impresión
+  var win=window.open('','_blank');
+  win.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>SST '+r.area+'</title>');
+  win.document.write('<style>@media print{body{margin:0;} button{display:none!important;}}</style>');
+  win.document.write('</head><body>');
+  win.document.write('<div style="text-align:right;padding:10px;"><button onclick="window.print()" style="padding:8px 16px;background:#1a5276;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:13px;">⬇ Imprimir / Descargar PDF</button></div>');
+  win.document.write(html);
+  win.document.write('</body></html>');
+  win.document.close();
+}
+
+// ========== PDF LÁMPARAS ==========
+function lamImprimirReg(i){
+  var LAM_REG=JSON.parse(localStorage.getItem('ucem_lam_registros')||'[]');
+  var r=LAM_REG[i];
+  if(!r) return;
+  var estadoColor=r.estado==='Operativa'?'#1a7a4a':'#C0392B';
+  var estadoBg=r.estado==='Operativa'?'#eaf7f0':'#fdf0ef';
+  var html='<div style="font-family:Arial,sans-serif;font-size:11px;max-width:700px;margin:0 auto;padding:20px;">';
+  // Header
+  html+='<div style="text-align:center;margin-bottom:16px;">';
+  html+='<div style="font-size:10px;color:#666;">UNIÓN CEMENTERA NACIONAL UCEM S.A. · SEGURIDAD INDUSTRIAL</div>';
+  html+='<div style="font-size:18px;font-weight:700;letter-spacing:1px;margin:4px 0;">INSPECCIÓN DE LÁMPARAS DE EMERGENCIA</div>';
+  html+='<div style="font-size:10px;color:#888;">Código: RSI-CO-02-GL | Fecha: '+(r.fechaCreacion||r.fecha)+'</div>';
+  html+='</div>';
+  // Datos
+  html+='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:14px;">';
+  html+='<div style="background:#f4f4f4;padding:6px 8px;border-radius:4px;"><div style="font-size:9px;color:#666;font-weight:600;">PLANTA</div><div style="font-weight:600;">'+r.planta+'</div></div>';
+  html+='<div style="background:#f4f4f4;padding:6px 8px;border-radius:4px;"><div style="font-size:9px;color:#666;font-weight:600;">ÁREA</div><div style="font-weight:600;">'+r.area+'</div></div>';
+  html+='<div style="background:#f4f4f4;padding:6px 8px;border-radius:4px;"><div style="font-size:9px;color:#666;font-weight:600;">CÓDIGO LÁMPARA</div><div style="font-weight:600;">'+r.codigo+'</div></div>';
+  html+='<div style="background:#f4f4f4;padding:6px 8px;border-radius:4px;"><div style="font-size:9px;color:#666;font-weight:600;">TÉCNICO</div><div style="font-weight:600;">'+(r.tecnico||'-')+'</div></div>';
+  html+='<div style="background:#f4f4f4;padding:6px 8px;border-radius:4px;"><div style="font-size:9px;color:#666;font-weight:600;">FECHA INSPECCIÓN</div><div style="font-weight:600;">'+r.fecha+'</div></div>';
+  html+='<div style="background:#f4f4f4;padding:6px 8px;border-radius:4px;"><div style="font-size:9px;color:#666;font-weight:600;">FECHA ÚLTIMO MTTO</div><div style="font-weight:600;">'+(r.fechaMtto||'-')+'</div></div>';
+  html+='</div>';
+  // Estado
+  html+='<div style="background:'+estadoBg+';border:2px solid '+estadoColor+';border-radius:8px;padding:12px;text-align:center;margin-bottom:14px;">';
+  html+='<div style="font-family:monospace;font-size:18px;font-weight:700;color:'+estadoColor+';">'+(r.estado==='Operativa'?'✓ OPERATIVA':'✗ NO OPERATIVA')+'</div>';
+  html+='<div style="font-size:12px;font-weight:600;color:'+estadoColor+';margin-top:4px;">Cumplimiento: '+(r.porcentaje||'0%')+'</div>';
+  html+='</div>';
+  // Tabla ítems
+  html+='<table style="width:100%;border-collapse:collapse;font-size:10px;margin-bottom:14px;">';
+  html+='<thead><tr style="background:#4a235a;color:#fff;">';
+  html+='<th style="padding:6px 8px;text-align:left;">ÍTEM DE VERIFICACIÓN</th>';
+  html+='<th style="padding:6px 8px;text-align:center;width:100px;">RESULTADO</th>';
+  html+='<th style="padding:6px 8px;text-align:left;">OBSERVACIÓN</th>';
+  html+='</tr></thead><tbody>';
+  LAM_ITEMS.forEach(function(item){
+    var v=r.respuestas?r.respuestas[item.id]:undefined;
+    var lbl=v==='cumple'?'CUMPLE':v==='nc'?'NO CUMPLE':v==='na'?'N/A':'S/R';
+    var vc=v==='cumple'?'#1a7a4a':v==='nc'?'#C0392B':v==='na'?'#888':'#999';
+    var obs=(r.observaciones&&r.observaciones[item.id])||'';
+    var bg=v==='nc'?'#fdf0ef':'#fff';
+    html+='<tr style="background:'+bg+';border-bottom:1px solid #eee;">';
+    html+='<td style="padding:5px 8px;">'+item.t+'</td>';
+    html+='<td style="padding:5px 8px;text-align:center;font-weight:700;color:'+vc+';">'+lbl+'</td>';
+    html+='<td style="padding:5px 8px;color:#555;">'+obs+'</td>';
+    html+='</tr>';
+  });
+  html+='</tbody></table>';
+  if(r.obs){
+    html+='<div style="background:#f8f8f8;border:1px solid #ddd;border-radius:6px;padding:10px;margin-bottom:12px;">';
+    html+='<div style="font-size:10px;font-weight:600;color:#555;margin-bottom:4px;">OBSERVACIONES GENERALES</div>';
+    html+='<div style="font-size:11px;">'+r.obs+'</div></div>';
+  }
+  html+='<div style="margin-top:16px;font-size:10px;color:#555;text-align:right;">';
+  html+='Realizado por: <strong>'+(r.tecnico||'-')+'</strong></div>';
+  html+='</div>';
+  var win=window.open('','_blank');
+  win.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Lámpara '+r.codigo+'</title>');
+  win.document.write('<style>@media print{body{margin:0;} button{display:none!important;}}</style>');
+  win.document.write('</head><body>');
+  win.document.write('<div style="text-align:right;padding:10px;"><button onclick="window.print()" style="padding:8px 16px;background:#4a235a;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:13px;">⬇ Imprimir / Descargar PDF</button></div>');
+  win.document.write(html);
+  win.document.write('</body></html>');
+  win.document.close();
 }
 
 // ========== INIT ==========
