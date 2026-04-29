@@ -718,25 +718,18 @@ function extGoP1(){
   var sel=document.getElementById('ext-plantaSelect').value;
   if(!sel){alert('Selecciona una planta para continuar.');return;}
   extPlantaActual=sel;
-  extEsChimborazo=true; // Todas las plantas usan código de trabajador
+  extEsChimborazo=(sel==='Planta Chimborazo');
   document.getElementById('extPlantaBarNombre').textContent=sel;
   document.getElementById('headerTitle').textContent='Inspección de Extintores · '+sel;
-  document.getElementById('ext-p1Chimborazo').classList.toggle('hidden',!extEsChimborazo);
-  document.getElementById('ext-p1Generica').classList.toggle('hidden',extEsChimborazo);
+  document.getElementById('ext-p1Chimborazo').classList.remove('hidden');
+  document.getElementById('ext-p1Generica').classList.add('hidden');
   document.getElementById('ext-p2Chimborazo').classList.toggle('hidden',!extEsChimborazo);
   document.getElementById('ext-p2Generica').classList.toggle('hidden',extEsChimborazo);
   extShowPage('ext-p1'); extSetS(1);
 }
 
 function extGoP2(){
-  if(extEsChimborazo){
-    if(!extTActual){alert('Ingresa un código de trabajador válido.');return;}
-  } else {
-    var n=document.getElementById('ext-nombreLibre').value.trim();
-    var c=document.getElementById('ext-cargoLibre').value.trim();
-    if(!n||!c){alert('Ingresa nombre y cargo del inspector.');return;}
-    extTActual={n:n,cargo:c,c:'',p:extPlantaActual};
-  }
+  if(!extTActual){alert('Ingresa un código de trabajador válido.');return;}
   extShowPage('ext-p2'); extSetS(2);
 }
 
@@ -919,7 +912,7 @@ function extRenderRes(ncs,rowData){
   var area=extEsChimborazo?document.getElementById('ext-areaS').value:document.getElementById('ext-areaLibre').value;
   var nInsp=extEsChimborazo?document.getElementById('ext-nInsp').value:document.getElementById('ext-nInspGenerica').value;
   var fecha=new Date().toLocaleDateString('es-EC');
-  var operativoGlobal=ncs.length===0;
+  var operativoGlobal=rowData.every(function(r){return r.operativo;});
   var rb=document.getElementById('ext-resBox');
   rb.className='res-box '+(operativoGlobal?'ap':'nap');
   var ncHtml='';
@@ -1148,8 +1141,8 @@ function extEditarReg(i){
   extEsChimborazo=(extPlantaActual==='Planta Chimborazo');
   document.getElementById('ext-plantaSelect').value=extPlantaActual;
   document.getElementById('extPlantaBarNombre').textContent=extPlantaActual;
-  document.getElementById('ext-p1Chimborazo').classList.toggle('hidden',!extEsChimborazo);
-  document.getElementById('ext-p1Generica').classList.toggle('hidden',extEsChimborazo);
+  document.getElementById('ext-p1Chimborazo').classList.remove('hidden');
+  document.getElementById('ext-p1Generica').classList.add('hidden');
   document.getElementById('ext-p2Chimborazo').classList.toggle('hidden',!extEsChimborazo);
   document.getElementById('ext-p2Generica').classList.toggle('hidden',extEsChimborazo);
   if(extEsChimborazo){
