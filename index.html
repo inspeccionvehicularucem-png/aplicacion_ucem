@@ -439,6 +439,32 @@ table.ext td input,table.ext td select{padding:5px 7px;font-size:12px;border-rad
 
 </div><!-- fin wrap -->
 
+<!-- MODAL DUPLICAR SST -->
+<div id="sst-modalDuplicar" class="modal-overlay">
+  <div class="modal-box">
+    <div style="font-size:14px;font-weight:600;margin-bottom:14px;color:var(--gris)">Duplicar inspección SST</div>
+    <div class="field"><label>Área</label><input type="text" id="sst-dupArea" placeholder="Ej: Producción"></div>
+    <div class="field"><label>Fecha</label><input type="date" id="sst-dupFecha"></div>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button onclick="sstConfirmarDuplicar()" style="flex:1;padding:10px;background:var(--azul);color:#fff;border:none;border-radius:6px;font-weight:600;font-size:13px;cursor:pointer">Duplicar</button>
+      <button onclick="document.getElementById('sst-modalDuplicar').style.display='none'" style="flex:1;padding:10px;background:var(--gc);color:var(--gris);border:1px solid var(--bd);border-radius:6px;font-weight:600;font-size:13px;cursor:pointer">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL DUPLICAR LÁMPARAS -->
+<div id="lam-modalDuplicar" class="modal-overlay">
+  <div class="modal-box">
+    <div style="font-size:14px;font-weight:600;margin-bottom:14px;color:var(--gris)">Duplicar inspección Lámpara</div>
+    <div class="field"><label>Código de lámpara</label><input type="text" id="lam-dupCodigo" placeholder="Ej: LAM-002"></div>
+    <div class="field"><label>Área / Ubicación</label><input type="text" id="lam-dupArea" placeholder="Ej: Pasillo B"></div>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button onclick="lamConfirmarDuplicar()" style="flex:1;padding:10px;background:#7d3c98;color:#fff;border:none;border-radius:6px;font-weight:600;font-size:13px;cursor:pointer">Duplicar</button>
+      <button onclick="document.getElementById('lam-modalDuplicar').style.display='none'" style="flex:1;padding:10px;background:var(--gc);color:var(--gris);border:1px solid var(--bd);border-radius:6px;font-weight:600;font-size:13px;cursor:pointer">Cancelar</button>
+    </div>
+  </div>
+</div>
+
 <!-- ===================== MÓDULO LÁMPARAS ===================== -->
 <div id="sec-lam" class="hidden">
 <div class="wrap" style="padding-bottom:80px;">
@@ -1672,6 +1698,7 @@ function sstRenderRegistros(){
           '<div class="reg-actions">'+
             '<span style="background:'+bg+';color:'+color+';font-weight:700;font-size:14px;padding:5px 12px;border-radius:4px;border:1px solid '+color+'">'+r.porcentaje+'</span>'+
             '<button onclick="sstEditarReg('+realIdx+')" style="border:1px solid #c8e6c9;background:#f1f8f1;color:#1a7a4a;">✎ Editar</button>'+
+            '<button onclick="sstDuplicarReg('+realIdx+')" style="border:1px solid var(--bd);background:#f0f7ff;color:var(--azul);">⧉ Dup.</button>'+
             '<button onclick="sstImprimirReg('+realIdx+')" style="border:1px solid #b3d4f5;background:#f0f7ff;color:var(--azul);">⬇ PDF</button>'+
             '<button onclick="sstEliminarReg('+realIdx+')" style="border:1px solid #fcc;background:#fff5f5;color:#c0392b;">✕ Eliminar</button>'+
           '</div>'+
@@ -2116,6 +2143,7 @@ function lamRenderRegistros(){
           '<div class="reg-actions">'+
             '<span style="background:'+bg+';color:'+col+';font-weight:700;font-size:11px;padding:4px 10px;border-radius:4px;border:1px solid '+col+'">'+r.estado+'</span>'+
             '<button onclick="lamEditarReg('+realIdx+')" style="border:1px solid #c8e6c9;background:#f1f8f1;color:#1a7a4a;">✎ Editar</button>'+
+            '<button onclick="lamDuplicarReg('+realIdx+')" style="border:1px solid var(--bd);background:#f0f7ff;color:var(--azul);">⧉ Dup.</button>'+
             '<button onclick="lamImprimirReg('+realIdx+')" style="border:1px solid #b3d4f5;background:#f0f7ff;color:var(--azul);">⬇ PDF</button>'+
             '<button onclick="lamEliminarReg('+realIdx+')" style="border:1px solid #fcc;background:#fff5f5;color:#c0392b;">✕</button>'+
           '</div>'+
@@ -2312,6 +2340,71 @@ function lamImprimirReg(i){
   win.document.write(html);
   win.document.write('</body></html>');
   win.document.close();
+}
+
+// ========== DUPLICAR SST ==========
+function sstDuplicarReg(i){
+  window._sstDupIndex=i;
+  var SST_REG=JSON.parse(localStorage.getItem('ucem_sst_registros')||'[]');
+  var r=SST_REG[i];
+  document.getElementById('sst-dupArea').value=r.area+' (copia)';
+  document.getElementById('sst-dupFecha').valueAsDate=new Date();
+  document.getElementById('sst-modalDuplicar').style.display='flex';
+}
+
+function sstConfirmarDuplicar(){
+  var i=window._sstDupIndex;
+  var areaNueva=document.getElementById('sst-dupArea').value.trim();
+  var fechaNueva=document.getElementById('sst-dupFecha').value;
+  if(!areaNueva){alert('Escribe el área.');return;}
+  var SST_REG=JSON.parse(localStorage.getItem('ucem_sst_registros')||'[]');
+  var copia=JSON.parse(JSON.stringify(SST_REG[i]));
+  var ahora=new Date();
+  var fechaGuardado=ahora.toLocaleDateString('es-EC')+' '+ahora.toLocaleTimeString('es-EC',{hour:'2-digit',minute:'2-digit'});
+  copia.id=Date.now();
+  copia.area=areaNueva;
+  copia.fecha=fechaNueva||copia.fecha;
+  copia.fechaCreacion=fechaGuardado;
+  copia.fechaActualizacion=null;
+  copia.sheetRow=null;
+  SST_REG.unshift(copia);
+  localStorage.setItem('ucem_sst_registros',JSON.stringify(SST_REG));
+  // Enviar al Sheet como nuevo registro
+  sstGuardarEnSheets(copia, false, null);
+  document.getElementById('sst-modalDuplicar').style.display='none';
+  sstRenderRegistros();
+}
+
+// ========== DUPLICAR LÁMPARAS ==========
+function lamDuplicarReg(i){
+  window._lamDupIndex=i;
+  var LAM_REG=JSON.parse(localStorage.getItem('ucem_lam_registros')||'[]');
+  var r=LAM_REG[i];
+  document.getElementById('lam-dupCodigo').value=r.codigo+' (copia)';
+  document.getElementById('lam-dupArea').value=r.area;
+  document.getElementById('lam-modalDuplicar').style.display='flex';
+}
+
+function lamConfirmarDuplicar(){
+  var i=window._lamDupIndex;
+  var codigoNuevo=document.getElementById('lam-dupCodigo').value.trim();
+  var areaNueva=document.getElementById('lam-dupArea').value.trim();
+  if(!codigoNuevo){alert('Escribe el código de lámpara.');return;}
+  var LAM_REG=JSON.parse(localStorage.getItem('ucem_lam_registros')||'[]');
+  var copia=JSON.parse(JSON.stringify(LAM_REG[i]));
+  var ahora=new Date();
+  var fechaGuardado=ahora.toLocaleDateString('es-EC')+' '+ahora.toLocaleTimeString('es-EC',{hour:'2-digit',minute:'2-digit'});
+  copia.id=Date.now();
+  copia.codigo=codigoNuevo;
+  copia.area=areaNueva||copia.area;
+  copia.fechaCreacion=fechaGuardado;
+  copia.fechaActualizacion=null;
+  copia.sheetRow=null;
+  LAM_REG.unshift(copia);
+  localStorage.setItem('ucem_lam_registros',JSON.stringify(LAM_REG));
+  lamGuardarEnSheets(copia, false, null);
+  document.getElementById('lam-modalDuplicar').style.display='none';
+  lamRenderRegistros();
 }
 
 // ========== INIT ==========
